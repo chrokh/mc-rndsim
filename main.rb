@@ -162,18 +162,70 @@ def parse_phase_dist phase
   )
 end
 
-def run n, params, phases
-  dist = parse params, phases
-  n.times.map do |i|
-    if i > 0 && i % 1000 == 0
-      system "clear" or system "cls"
-      puts "#{(i / n.to_f * 100).round} %"
-    end
-    world = dist.sample!
-    world.run
+def write file, lines
+  line
+  puts lines.first
+  exit
+end
+
+class CSVFormatter
+  def initialize line
   end
 end
 
-run(ARGV[0].to_i, ARGV[1], ARGV[2]).map do |r|
+class Writer
+  def initialize output
+    @output = output
+    @cache  = []
+    @has_written_header = false
+  end
+  def append data
+    @cache << data
+  end
+  def flush!
+    @cache.each do |data|
+      csv = CSVFormatter.new data
+      if @has_written_header
+        open(@output, 'a') { |f| f.puts csv.data }
+      else
+        open(@output, 'w') { |f| f.puts csv.header }
+        @has_written_header = true
+      end
+    end
+    @cache = []
+  end
+end
+
+class CSVFormatter
+  def initialize data
+    @data = data
+  end
+  def header
+    @data.keys.map { |k|
+      @data[k].length.times.map { |n| "#{k}_#{n}" }.join(',')
+    }.join(',')
+  end
+  def data
+    @data.values.map { |v| v.join(',') }.join(',')
+  end
+end
+
+def run n, params, phases, output
+  dist = parse params, phases
+  writer = Writer.new output
+  n.times do |i|
+    world  = dist.sample!
+    result = world.run
+    writer.append result
+    if i > 0 && i % 100 == 0
+      system "clear" or system "cls"
+      puts "#{(i / n.to_f * 100).round} %"
+      writer.flush!
+    end
+  end
+  writer.flush!
+end
+
+run(ARGV[0].to_i, ARGV[1], ARGV[2], ARGV[3]).map do |r|
   puts r
 end
