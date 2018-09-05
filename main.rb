@@ -164,7 +164,11 @@ end
 
 def run n, params, phases
   dist = parse params, phases
-  n.times.map do
+  n.times.map do |i|
+    if i > 0 && i % 1000 == 0
+      system "clear" or system "cls"
+      puts "#{(i / n.to_f * 100).round} %"
+    end
     world = dist.sample!
     world.run
   end
