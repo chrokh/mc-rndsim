@@ -229,7 +229,7 @@ def run n, params, phases, output
     world  = dist.sample!
     result = world.run
     writer.append result
-    if i > 0 && i % 100 == 0
+    if (i > 0 && i % 100 == 0) || i == n - 1
       system "clear" or system "cls"
       puts "#{(i / n.to_f * 100).round} %"
       writer.flush!
