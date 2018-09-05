@@ -78,9 +78,11 @@ class World
     gonos   = decision_points.map(&:decision)
     conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
     {
-      enpvs: enpvs,
-      gonos: gonos,
-      conseqs: conseqs
+      discount_rate:  @rate,
+      threshold:      @mini,
+      enpvs:          enpvs,
+      gonos:          gonos,
+      conseqs:        conseqs
     }
   end
 end
@@ -202,11 +204,21 @@ class CSVFormatter
   end
   def header
     @data.keys.map { |k|
-      @data[k].length.times.map { |n| "#{k}_#{n}" }.join(',')
+      if @data[k].is_a? Array
+        @data[k].length.times.map { |n| "#{k}_#{n}" }.join(',')
+      else
+        k
+      end
     }.join(',')
   end
   def data
-    @data.values.map { |v| v.join(',') }.join(',')
+    @data.values.map do |v|
+      if v.is_a? Array
+        v.join(',')
+      else
+        v
+      end
+    end.join(',')
   end
 end
 
