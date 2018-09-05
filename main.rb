@@ -109,4 +109,4 @@ def run n, input
   end
 end
 
-run 3, 'input.csv'
+run ARGV[0].to_i, ARGV[1]
