@@ -78,11 +78,11 @@ class World
     gonos   = decision_points.map(&:decision)
     conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
     {
-      discount_rate:  @rate,
-      threshold:      @mini,
-      enpvs:          enpvs,
-      gonos:          gonos,
-      conseqs:        conseqs
+      discount_rate:    @rate,
+      threshold:        @mini,
+      enpv:             enpvs,
+      decision:         gonos,
+      conseq_decision:  conseqs
     }
   end
 end
