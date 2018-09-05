@@ -1,4 +1,4 @@
-class TriDist
+class UniDist
   def initialize min, max
     @min = min.to_f
     @max = max.to_f
@@ -148,7 +148,7 @@ end
 def parse_dist dist
   if dist.index '-'
     args = dist.split('-')
-    TriDist.new args[0], args[1]
+    UniDist.new args[0], args[1]
   else
     ValDist.new dist
   end
