@@ -47,15 +47,42 @@ class Phase
   end
 end
 
+class Market
+  def initialize time, size
+    @time = time
+    @size = size
+  end
+  def phases
+    x = @time.to_i.times.map do |t|
+      y2   = @size / (@time + 1) * 2
+      k    = y2 / @time
+      cash = (t+1) * k
+      Phase.new 1, 0, cash, 1
+    end
+  end
+end
+
+class MarketDist
+  def initialize time, size
+    @time = time
+    @size = size
+  end
+  def sample!
+    Market.new(@time.sample!, @size.sample!)
+  end
+end
+
 class WorldDist
-  def initialize phases, rate, mini
+  def initialize phases, market, rate, mini
     @phases = phases
+    @market = market
     @rate = rate
     @mini = mini
   end
   def sample!
     World.new(
       @phases.map { |p| p.sample! },
+      @market.sample!,
       @rate.sample!,
       @mini.sample!
     )
@@ -63,14 +90,15 @@ class WorldDist
 end
 
 class World
-  def initialize phases, rate, mini
+  def initialize phases, market, rate, mini
     @phases = phases
+    @market = market
     @rate = rate
     @mini = mini
   end
   def decision_points
     @decision_points ||= ladder(@phases).map do |phases|
-      DecisionPoint.new phases, @rate, @mini
+      DecisionPoint.new phases, @market, @rate, @mini
     end
   end
   def run
@@ -88,8 +116,9 @@ class World
 end
 
 class DecisionPoint
-  def initialize phases, rate, mini
+  def initialize phases, market, rate, mini
     @phases = phases
+    @market = market
     @rate   = rate
     @mini   = mini
   end
@@ -107,10 +136,12 @@ class DecisionPoint
   end
   def cashflows
     ladder(@phases).map do |flows|
+      # We add the market ex-post to avoid laddering the market
+      xs = flows + @market.phases
       Cashflow.new(
-        flows.last.cost,
-        flows.last.cash,
-        flows.drop(1).map(&:time).reduce(0, &:+)
+        xs.last.cost,
+        xs.last.cash,
+        xs.drop(1).map(&:time).reduce(0, &:+)
       )
     end
   end
@@ -136,17 +167,31 @@ end
 
 require 'yaml'
 def parse input1, input2
-  mini   = parse_dist YAML.load_file(input1)['threshold']
-  rate   = parse_dist YAML.load_file(input1)['discount_rate']
+  args = YAML.load_file(input1)
+  mini   = parse_dist args['threshold']
+  rate   = parse_dist args['discount_rate']
+  market = MarketParser.new(args['market']).parse
   phases = File.readlines(input2)
     .reject { |l| l=="\r\n" || l=="\r" || l=="\n" }
     .drop(1)
     .map { |l| parse_phase_dist l }
-  WorldDist.new(phases, rate, mini)
+  WorldDist.new(phases, market, rate, mini)
+end
+
+class MarketParser
+  def initialize data
+    @data = data
+  end
+  def parse
+    MarketDist.new(
+      parse_dist(@data['years']),
+      parse_dist(@data['size'])
+    )
+  end
 end
 
 def parse_dist dist
-  if dist.index '-'
+  if dist.to_s.index '-'
     args = dist.split('-')
     UniDist.new args[0], args[1]
   else
