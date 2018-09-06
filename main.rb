@@ -258,7 +258,8 @@ class CSVFormatter
   end
 end
 
-def run n, params, phases, output
+def run n, params, phases, output, seed
+  unless seed.nil? then srand(seed.to_i) end
   dist = parse params, phases
   writer = Writer.new output
   n.times do |i|
@@ -274,4 +275,4 @@ def run n, params, phases, output
   writer.flush!
 end
 
-run(ARGV[0].to_i, ARGV[1], ARGV[2], ARGV[3])
+run(ARGV[0].to_i, ARGV[1], ARGV[2], ARGV[3], ARGV[4])
