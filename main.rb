@@ -42,9 +42,6 @@ class Phase
     @cash = cash
     @prob = prob
   end
-  def cashflow
-    @cash - @cost
-  end
 end
 
 class Market
