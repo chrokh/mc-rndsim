@@ -48,6 +48,7 @@ class Phase
 end
 
 class Market
+  attr_reader :time, :size
   def initialize time, size
     @time = time
     @size = size
@@ -106,11 +107,17 @@ class World
     gonos   = decision_points.map(&:decision)
     conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
     {
-      discount_rate:    @rate,
-      threshold:        @mini,
       enpv:             enpvs,
       decision:         gonos,
-      conseq_decision:  conseqs
+      conseq_decision:  conseqs,
+      discount_rate:    @rate,
+      threshold:        @mini,
+      time:             @phases.map(&:time),
+      cost:             @phases.map(&:cost),
+      revenue:          @phases.map(&:cash),
+      prob:             @phases.map(&:prob),
+      market_size:      @market.size,
+      market_time:      @market.time,
     }
   end
 end
