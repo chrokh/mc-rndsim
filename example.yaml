@@ -1,5 +1,5 @@
 discount_rate:  0.08-0.25
 threshold:      0-100
 market:
-  size:  0-1000
+  size:  0-1500
   years: 10
