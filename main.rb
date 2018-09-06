@@ -99,7 +99,7 @@ class World
   end
   def decision_points
     @decision_points ||= ladder(@phases).map do |phases|
-      DecisionPoint.new phases, @market, @rate, @mini
+      DecisionPoint.new (phases + @market.phases), @rate, @mini
     end
   end
   def run
@@ -123,9 +123,8 @@ class World
 end
 
 class DecisionPoint
-  def initialize phases, market, rate, mini
+  def initialize phases, rate, mini
     @phases = phases
-    @market = market
     @rate   = rate
     @mini   = mini
   end
@@ -142,13 +141,12 @@ class DecisionPoint
     cashflows.map { |c| c.pv @rate }
   end
   def cashflows
-    ladder(@phases).map do |flows|
-      # We add the market ex-post to avoid laddering the market
-      xs = flows + @market.phases
+    # Returns cashflows in reversed order but with absolute timestamps.
+    ladder(@phases.reverse).map do |flows|
       Cashflow.new(
-        xs.last.cost,
-        xs.last.cash,
-        xs.drop(1).map(&:time).reduce(0, &:+)
+        flows.first.cost,
+        flows.first.cash,
+        flows.drop(1).map(&:time).reduce(0, &:+)
       )
     end
   end
