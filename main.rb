@@ -209,12 +209,6 @@ def parse_phase_dist phase
   )
 end
 
-def write file, lines
-  line
-  puts lines.first
-  exit
-end
-
 class Writer
   def initialize output
     @output = output
@@ -278,6 +272,4 @@ def run n, params, phases, output
   writer.flush!
 end
 
-run(ARGV[0].to_i, ARGV[1], ARGV[2], ARGV[3]).map do |r|
-  puts r
-end
+run(ARGV[0].to_i, ARGV[1], ARGV[2], ARGV[3])
