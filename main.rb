@@ -170,11 +170,6 @@ def write file, lines
   exit
 end
 
-class CSVFormatter
-  def initialize line
-  end
-end
-
 class Writer
   def initialize output
     @output = output
