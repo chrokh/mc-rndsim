@@ -246,7 +246,7 @@ class CSVFormatter
   def header
     @data.keys.map { |k|
       if @data[k].is_a? Array
-        @data[k].length.times.map { |n| "#{k}_#{n}" }.join(',')
+        @data[k].length.times.map { |n| "#{k}#{n}" }.join(',')
       else
         k
       end
