@@ -1,4 +1,4 @@
-# Monte Carlo Simulation of Policy Intervention for R&D.
+# Monte Carlo Simulation of Policy Intervention for R&D
 
 This simple Monte Carlo simulation explores the effects of phase and agent parameter changes (which proxy policy intervention changes) on (1) the ENPV of R&D projects, and (2) the results of ENPV-based go/no-go decisions on said R&D projects.
 
