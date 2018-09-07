@@ -1,0 +1,5 @@
+discount_rate:  0.08-0.3
+threshold:      0-200
+market:
+  size:  0-750
+  years: 10
