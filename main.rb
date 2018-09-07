@@ -266,9 +266,9 @@ def run n, params, phases, output, seed
     world  = dist.sample!
     result = world.run
     writer.append result
-    if (i > 0 && i % 100 == 0) || i == n - 1
+    if (i > 0 && i % 100 == 0) || (i+1) == n
       system "clear" or system "cls"
-      puts "#{(i / n.to_f * 100).round} %"
+      puts "#{((i+1) / n.to_f * 100).round} %"
       writer.flush!
     end
   end
