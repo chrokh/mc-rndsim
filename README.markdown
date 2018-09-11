@@ -19,11 +19,12 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 
 # Usage
 
-`ruby main.rb [n] [params.yaml] [phases.csv] [output.csv] [seed]`
+`ruby main.rb [n] [params.yaml] [phases.csv] [interventions.csv] [output.csv] [seed]`
 
 - `n` The number of samples/worlds/runs to generate and explore.
 - `params.yaml` Path to YAML file containing stochastic simulation parameters.
 - `phases.csv` Path to CSV file containing list of stochastic phases.
+- `interventions.csv` Path to CSV file containing list of stochastic interventions.
 - `output.csv` Path to output CSV file (which will be overwritten without prompting!).
 - `seed` (optional) An integer to seed the randomizer.
 

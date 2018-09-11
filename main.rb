@@ -126,20 +126,16 @@ class World
 end
 
 class SimulationDist
-  def initialize phases, market, rate, mini, interventions
-    @phases = phases
-    @market = market
-    @rate = rate
-    @mini = mini
-    @interventions = interventions
+  def initialize config
+    @config = config
   end
   def sample!
     Simulation.new(
-      @phases.map { |p| p.sample! },
-      @market.sample!,
-      @rate.sample!,
-      @mini.sample!,
-      @interventions.sample!
+      @config.phases.map { |p| p.sample! },
+      @config.market.sample!,
+      @config.rate.sample!,
+      @config.mini.sample!,
+      @config.interventions.sample!
     )
   end
 end
@@ -231,22 +227,51 @@ class MarketParser
   end
 end
 
-class InterventionsParser
+class PhasesParser
   def initialize data
-    @data = Hash(data)
+    @data = data
   end
   def parse
-    MultiDist.new(
-      @data.keys.map do |key|
-        dist = InterventionDist.new(
-          @data[key]['operator'],
-          parse_dist(@data[key]['operand']),
-          parse_dist(@data[key]['phase']),
-          @data[key]['property'],
-        )
-        Hash[key, dist]
-      end.reduce(&:merge)
-    )
+    CSVParser.new(@data).lines.map do |line|
+      PhaseDist.new(
+        parse_dist(line[0]),
+        parse_dist(line[1]),
+        parse_dist(line[2]),
+        parse_dist(line[3]),
+      )
+    end
+  end
+end
+
+class CSVParser
+  def initialize data
+    @data = data
+  end
+  def lines
+    @data
+      .split("\n")
+      .drop(1)
+      .map { |line| line.split(',') }
+      .map { |line| line.map { |value| value.strip } }
+  end
+end
+
+class InterventionsParser
+  def initialize data
+    @data = data
+  end
+  def parse
+    interventions = CSVParser.new(@data).lines.map do |line|
+      Hash[
+        line[0],
+        InterventionDist.new(
+          line[3],
+          parse_dist(line[4]),
+          parse_dist(line[1]),
+          line[2]
+        )]
+    end.reduce(&:merge)
+    MultiDist.new(interventions)
   end
 end
 
@@ -300,16 +325,6 @@ def parse_dist dist
   end
 end
 
-def parse_phase_dist phase
-  args = phase.gsub(' ', '').split ','
-  PhaseDist.new(
-    parse_dist(args[0]),
-    parse_dist(args[1]),
-    parse_dist(args[2]),
-    parse_dist(args[3]),
-  )
-end
-
 class Writer
   def initialize output
     @output = output
@@ -357,30 +372,50 @@ class CSVFormatter
   end
 end
 
-require 'yaml'
-class SimulationParser
-  def initialize input1, input2
-    @input1 = input1
-    @input2 = input2
+class InputParser
+  def initialize config, phases, interventions
+    @config = config
+    @phases = phases
+    @interventions = interventions
   end
-  def parse
-    args = YAML.load_file(@input1)
-    mini   = parse_dist args['threshold']
-    rate   = parse_dist args['discount_rate']
-    market = MarketParser.new(args['market']).parse
-    interventions = InterventionsParser.new(args['interventions']).parse
-    phases = File.readlines(@input2)
-      .reject { |l| l=="\r\n" || l=="\r" || l=="\n" }
-      .drop(1)
-      .map { |l| parse_phase_dist l }
-    SimulationDist.new(phases, market, rate, mini, interventions)
+  def mini
+    parse_dist @config['threshold']
+  end
+  def rate
+    parse_dist @config['discount_rate']
+  end
+  def market
+    MarketParser.new(@config['market']).parse
+  end
+  def interventions
+    InterventionsParser.new(@interventions).parse
+  end
+  def phases
+    PhasesParser.new(@phases).parse
   end
 end
 
-def run n, params, phases, output, seed
+require 'yaml'
+class SimulationParser
+  def initialize config, phases, interventions
+    @config = config
+    @phases = phases
+    @interventions = interventions
+  end
+  def parse
+    SimulationDist.new(
+      InputParser.new(
+        YAML.load_file(@config),
+        File.read(@phases),
+        File.read(@interventions),
+      ))
+  end
+end
+
+def run n, input1, input2, input3, output, seed
   unless seed.nil? then srand(seed.to_i) end
   writer = Writer.new output
-  dist   = SimulationParser.new(params, phases).parse
+  dist   = SimulationParser.new(input1, input2, input3).parse
   n.times do |i|
     writer.append (dist.sample!.run)
     if (i > 0 && i % 100 == 0) || (i+1) == n
@@ -392,4 +427,4 @@ def run n, params, phases, output, seed
   writer.flush!
 end
 
-run(ARGV[0].to_i, ARGV[1], ARGV[2], ARGV[3], ARGV[4])
+run(ARGV[0].to_i, ARGV[1], ARGV[2], ARGV[3], ARGV[4], ARGV[5])
