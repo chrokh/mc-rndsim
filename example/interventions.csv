@@ -1,0 +1,3 @@
+name,  phase,  property,  operator,  operand
+i1_,   0-4,    revenue,   +,         0-1000
+i2_,   0-4,    cost,      *,         0-0.8
