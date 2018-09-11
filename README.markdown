@@ -33,7 +33,7 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 
 The example below is based on the data found in the `example` folder.
 
-`ruby main.rb 10000 example/config.yaml example/phases.csv example/interventions.csv output/example/output.csv`
+`ruby main.rb 10000 example/input/config.yaml example/input/phases.csv example/input/interventions.csv example/output/example.csv 1`
 
 
 # License
