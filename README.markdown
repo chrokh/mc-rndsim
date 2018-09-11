@@ -28,17 +28,9 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 - `seed` (optional) An integer to seed the randomizer.
 
 
-# Example
+# Examples
 
-See `example.yaml` for an example of how to structure `params.yaml`.
-
-See `example.csv` for an example of how to structure `params.csv`.
-
-Run the example by executing:
-
-`ruby main.rb [n] example.yaml example.csv [output.csv]<cr>`
-
-where `[n]` is replaced by the number of samples you wish to run, and `[output.csv]` is replaced by a path to a file to which you want to write your output results.
+TODO
 
 
 # License

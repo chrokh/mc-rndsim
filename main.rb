@@ -42,6 +42,21 @@ class Phase
     @cash = cash
     @prob = prob
   end
+  def apply intervention
+    operator = intervention.operator
+    operand  = intervention.operand
+    property = intervention.property
+    case property
+    when 'revenue'
+      Phase.new(@time, @cost, @cash.send(operator, operand), @prob)
+    when 'cost'
+      cost = @cost.send(operator, operand)
+      cost = cost < 0 ? 0 : cost
+      Phase.new(@time, cost, @cash, @prob)
+    else
+      raise Error, 'Invalid intervention'
+    end
+  end
 end
 
 class Market
@@ -70,23 +85,6 @@ class MarketDist
   end
 end
 
-class WorldDist
-  def initialize phases, market, rate, mini
-    @phases = phases
-    @market = market
-    @rate = rate
-    @mini = mini
-  end
-  def sample!
-    World.new(
-      @phases.map { |p| p.sample! },
-      @market.sample!,
-      @rate.sample!,
-      @mini.sample!
-    )
-  end
-end
-
 class World
   def initialize phases, market, rate, mini
     @phases = phases
@@ -99,7 +97,7 @@ class World
       DecisionPoint.new (phases + @market.phases), @rate, @mini
     end
   end
-  def run
+  def run name
     enpvs   = decision_points.map(&:enpv)
     gonos   = decision_points.map(&:decision)
     conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
@@ -107,15 +105,69 @@ class World
       enpv:             enpvs,
       decision:         gonos,
       conseq_decision:  conseqs,
-      discount_rate:    @rate,
-      threshold:        @mini,
       time:             @phases.map(&:time),
       cost:             @phases.map(&:cost),
       revenue:          @phases.map(&:cash),
       prob:             @phases.map(&:prob),
       market_size:      @market.size,
       market_time:      @market.time,
-    }
+    }.map { |k,v| ["#{name}#{k}", v] }.to_h
+  end
+  def apply intervention
+    phases = @phases.map.with_index do |e,i|
+      if i == intervention.phase.to_i
+        e.apply intervention
+      else
+        e
+      end
+    end
+    World.new(phases, @market, @rate, @mini)
+  end
+end
+
+class SimulationDist
+  def initialize phases, market, rate, mini, interventions
+    @phases = phases
+    @market = market
+    @rate = rate
+    @mini = mini
+    @interventions = interventions
+  end
+  def sample!
+    Simulation.new(
+      @phases.map { |p| p.sample! },
+      @market.sample!,
+      @rate.sample!,
+      @mini.sample!,
+      @interventions.sample!
+    )
+  end
+end
+
+class Simulation
+  def initialize phases, market, rate, mini, interventions
+    @phases = phases
+    @market = market
+    @rate = rate
+    @mini = mini
+    @interventions = interventions
+  end
+  def run
+    baseline = World.new(@phases, @market, @rate, @mini)
+    deviations = @interventions.keys.map { |key|
+      intervention = @interventions[key]
+      deviation = intervention.apply(baseline)
+      Hash[
+        "#{key}intervention_phase"    => intervention.phase,
+        "#{key}intervention_operator" => intervention.operator,
+        "#{key}intervention_operand"  => intervention.operand,
+        "#{key}intervention_property" => intervention.property,
+      ].merge(deviation.run(key))
+    }.reduce(&:merge) || {}
+    {
+      discount_rate:         @rate,
+      threshold:             @mini,
+    }.merge(baseline.run('')).merge(deviations)
   end
 end
 
@@ -167,19 +219,6 @@ def ladder xs
   xs.reduce([]) { |xs, x| (xs.map{|y| y<<x}) << [x] }
 end
 
-require 'yaml'
-def parse input1, input2
-  args = YAML.load_file(input1)
-  mini   = parse_dist args['threshold']
-  rate   = parse_dist args['discount_rate']
-  market = MarketParser.new(args['market']).parse
-  phases = File.readlines(input2)
-    .reject { |l| l=="\r\n" || l=="\r" || l=="\n" }
-    .drop(1)
-    .map { |l| parse_phase_dist l }
-  WorldDist.new(phases, market, rate, mini)
-end
-
 class MarketParser
   def initialize data
     @data = data
@@ -189,6 +228,66 @@ class MarketParser
       parse_dist(@data['years']),
       parse_dist(@data['size'])
     )
+  end
+end
+
+class InterventionsParser
+  def initialize data
+    @data = Hash(data)
+  end
+  def parse
+    MultiDist.new(
+      @data.keys.map do |key|
+        dist = InterventionDist.new(
+          @data[key]['operator'],
+          parse_dist(@data[key]['operand']),
+          parse_dist(@data[key]['phase']),
+          @data[key]['property'],
+        )
+        Hash[key, dist]
+      end.reduce(&:merge)
+    )
+  end
+end
+
+class MultiDist
+  def initialize hash
+    @hash = Hash(hash)
+  end
+  def sample!
+    @hash.keys.map do |key|
+      Hash[key, @hash[key].sample!]
+    end.reduce(&:merge) || {}
+  end
+end
+
+class InterventionDist
+  def initialize operator, operand, phase, property
+    @operator = operator
+    @operand = operand
+    @phase = phase
+    @property = property
+  end
+  def sample!
+    Intervention.new(
+      @operator,
+      @operand.sample!,
+      @phase.sample!.round,
+      @property
+    )
+  end
+end
+
+class Intervention
+  attr_reader :operator, :operand, :phase, :property
+  def initialize operator, operand, phase, property
+    @operator = operator
+    @operand = operand
+    @phase = phase
+    @property = property
+  end
+  def apply world
+    world.apply self
   end
 end
 
@@ -258,14 +357,32 @@ class CSVFormatter
   end
 end
 
+require 'yaml'
+class SimulationParser
+  def initialize input1, input2
+    @input1 = input1
+    @input2 = input2
+  end
+  def parse
+    args = YAML.load_file(@input1)
+    mini   = parse_dist args['threshold']
+    rate   = parse_dist args['discount_rate']
+    market = MarketParser.new(args['market']).parse
+    interventions = InterventionsParser.new(args['interventions']).parse
+    phases = File.readlines(@input2)
+      .reject { |l| l=="\r\n" || l=="\r" || l=="\n" }
+      .drop(1)
+      .map { |l| parse_phase_dist l }
+    SimulationDist.new(phases, market, rate, mini, interventions)
+  end
+end
+
 def run n, params, phases, output, seed
   unless seed.nil? then srand(seed.to_i) end
-  dist = parse params, phases
   writer = Writer.new output
+  dist   = SimulationParser.new(params, phases).parse
   n.times do |i|
-    world  = dist.sample!
-    result = world.run
-    writer.append result
+    writer.append (dist.sample!.run)
     if (i > 0 && i % 100 == 0) || (i+1) == n
       system "clear" or system "cls"
       puts "#{((i+1) / n.to_f * 100).round} %"
