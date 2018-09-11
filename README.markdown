@@ -31,9 +31,8 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 
 # Examples
 
-The example below is based on the data found in the `example` folder.
+An example can be found in the `example` folder. Navigate into the folder and run `run.sh` to execute it. Explore each of the input files to understand how input files should be structured.
 
-`ruby main.rb 10000 example/input/config.yaml example/input/phases.csv example/input/interventions.csv example/output/example.csv 1`
 
 
 # License
