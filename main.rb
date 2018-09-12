@@ -177,22 +177,18 @@ class DecisionPoint
     @phases.map(&:prob).reduce(&:*)
   end
   def enpv
-    @enpv ||= npv * remaining_prob
+    @enpv ||= epvs.reduce(&:+)
   end
-  def npv
-    pvs.reduce(&:+)
-  end
-  def pvs
-    cashflows.map { |c| c.pv @rate }
+  def epvs
+    cashflows.map { |c| c.epv @rate }
   end
   def cashflows
-    # Returns cashflows in reversed order but with absolute timestamps.
     ladder(@phases.reverse).map do |flows|
-      Cashflow.new(
-        flows.first.cost,
-        flows.first.cash,
-        flows.drop(1).map(&:time).reduce(0, &:+)
-      )
+      time_to                  = flows.drop(1).map(&:time).reduce(0, &:+)
+      completed_prob_at_flow   = flows.drop(1).map(&:prob).reduce(1, &:*)
+      remaining_prob_from_flow = remaining_prob / completed_prob_at_flow
+      cashflow                 = flows.first.cash - flows.first.cost
+      Cashflow.new(cashflow, time_to, remaining_prob, remaining_prob_from_flow)
     end
   end
   def decision
@@ -201,13 +197,17 @@ class DecisionPoint
 end
 
 class Cashflow
-  def initialize cost, cash, time_to
-    @cost = cost
-    @cash = cash
+  def initialize cashflow, time_to, initial_prob, remaining_prob
+    @cashflow = cashflow
     @time_to = time_to
+    @initial_prob = initial_prob
+    @remaining_prob = remaining_prob
   end
   def pv rate
-    (@cash - @cost) / ((1 + rate) ** @time_to)
+    @cashflow / ((1 + rate) ** @time_to)
+  end
+  def epv rate
+    pv(rate) * (@initial_prob / @remaining_prob)
   end
 end
 
