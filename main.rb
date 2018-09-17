@@ -1,4 +1,4 @@
-require './lib/lib'
+require_relative 'lib/lib'
 
 def run n, input1, input2, input3, output, seed
   unless seed.nil? then srand(seed.to_i) end
