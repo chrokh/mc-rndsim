@@ -171,7 +171,7 @@ class DecisionPoint
   def initialize phases, rate, mini
     @phases = phases
     @rate   = rate
-    @mini   = mini
+    @mini   = mini # TODO: Should not be passed through constructor?
   end
   def remaining_prob
     @phases.map(&:prob).reduce(&:*)
