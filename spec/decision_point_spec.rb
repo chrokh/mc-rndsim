@@ -77,15 +77,38 @@ describe DecisionPoint do
   end
 
 
-  context '#epvs' do
-    xit 'works'
+  context '#enpv' do # Full integration
+    subject { DecisionPoint.new([p1,p2,p3], rate, nil).enpv.round(accuracy) }
+    let (:accuracy) { 12 }
+
+    context 'example 1' do
+      let (:p1)   { double(time: 5, prob:0.1, cash:50, cost:100) }
+      let (:p2)   { double(time: 6, prob:0.2, cash:60, cost:200) }
+      let (:p3)   { double(time: 7, prob:0.3, cash:70, cost:300) }
+      let (:rate) { 0.11 }
+      it do
+        is_expected.to eq (
+          (50-100) / (1.11 ** 0)     * ((0.1*0.2*0.3) / (0.1*0.2*0.3)) +
+          (60-200) / (1.11 ** 5)     * ((0.1*0.2*0.3) / (0.2*0.3)) +
+          (70-300) / (1.11 ** (5+6)) * ((0.1*0.2*0.3) / 0.3)
+        ).round(accuracy)
+      end
+    end
+
+    context 'example 2' do
+      let (:p1)   { double(time: 20, prob:0.32, cash:0,    cost:500) }
+      let (:p2)   { double(time: 5,  prob:0.87, cash:0,    cost:200) }
+      let (:p3)   { double(time: 13, prob:1,    cash:2000, cost:0) }
+      let (:rate) { 0.18 }
+      it do
+        is_expected.to eq (
+          (0-500)  / (1.18 ** 0)      * ((0.32*0.87*1) / (0.32*0.87*1)) +
+          (0-200)  / (1.18 ** 20)     * ((0.32*0.87*1) / (0.87*1)) +
+          (2000-0) / (1.18 ** (20+5)) * ((0.32*0.87*1) / 1)
+        ).round(accuracy)
+      end
+    end
   end
-
-
-  context '#enpv' do
-    xit 'works'
-  end
-
 
 end
 
