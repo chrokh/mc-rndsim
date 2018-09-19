@@ -60,28 +60,43 @@ class Phase
 end
 
 class Market
-  attr_reader :time, :size
-  def initialize time, size
+  attr_reader :time, :cost, :cash, :prob
+  def initialize time, cost, cash, prob
     @time = time
-    @size = size
+    @cost = cost
+    @cash = cash
+    @prob = prob
   end
   def phases
     x = @time.to_i.times.map do |t|
-      y2   = @size / (@time + 1) * 2
+
+      # cash (TODO: refactor into interpolation class and test)
+      y2   = @cash / (@time + 1) * 2
       k    = y2 / @time
       cash = (t+1) * k
-      Phase.new 1, 0, cash, 1
+
+      # cost (TODO: refactor into interpolation class and test)
+      y2   = @cost / (@time + 1) * 2
+      k    = y2 / @time
+      cost = (t+1) * k
+
+      # prob (TODO: refactor into interpolation class and test)
+      prob = @prob ** (1.0 / @time)
+
+      Phase.new 1, cost, cash, prob
     end
   end
 end
 
 class MarketDist
-  def initialize time, size
+  def initialize time, cost, cash, prob
     @time = time
-    @size = size
+    @cost = cost
+    @cash = cash
+    @prob = prob
   end
   def sample!
-    Market.new(@time.sample!, @size.sample!)
+    Market.new(@time.sample!, @cost.sample!, @cash.sample!, @prob.sample!)
   end
 end
 
@@ -101,16 +116,15 @@ class World
     enpvs   = decision_points.map(&:enpv)
     gonos   = decision_points.map(&:decision)
     conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
+    phases  = @phases + @market.phases
     {
       enpv:             enpvs,
       decision:         gonos,
       conseq_decision:  conseqs,
-      time:             @phases.map(&:time),
-      cost:             @phases.map(&:cost),
-      revenue:          @phases.map(&:cash),
-      prob:             @phases.map(&:prob),
-      market_size:      @market.size,
-      market_time:      @market.time,
+      time:             phases.map(&:time),
+      cost:             phases.map(&:cost),
+      revenue:          phases.map(&:cash),
+      prob:             phases.map(&:prob),
     }.map { |k,v| ["#{name}#{k}", v] }.to_h
   end
   def apply intervention
@@ -220,9 +234,12 @@ class MarketParser
     @data = data
   end
   def parse
+    line = CSVParser.new(@data).lines.last
     MarketDist.new(
-      parse_dist(@data['years']),
-      parse_dist(@data['size'])
+      parse_dist(line[0]),
+      parse_dist(line[1]),
+      parse_dist(line[2]),
+      parse_dist(line[3]),
     )
   end
 end
@@ -232,7 +249,8 @@ class PhasesParser
     @data = data
   end
   def parse
-    CSVParser.new(@data).lines.map do |line|
+    lines = CSVParser.new(@data).lines
+    lines[0..lines.length-2].map do |line|
       PhaseDist.new(
         parse_dist(line[0]),
         parse_dist(line[1]),
@@ -385,7 +403,7 @@ class InputParser
     parse_dist @config['discount_rate']
   end
   def market
-    MarketParser.new(@config['market']).parse
+    MarketParser.new(@phases).parse
   end
   def interventions
     InterventionsParser.new(@interventions).parse
