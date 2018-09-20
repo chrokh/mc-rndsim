@@ -1,5 +1,25 @@
 df <- read.csv("./output/example.csv")
 
+
+# PLOT 1
+# ======
+
+boxplot(df$enpv0, df$enpv1, df$enpv2, df$enpv3, df$enpv4, df$enpv5,
+        ylab = 'ENPV upon entering phase',
+        xlab = 'Development followed by sales',
+        las = 1,
+        xaxt = 'n',
+        col = 'bisque1',
+        type = 'n'
+        )
+axis(1, at = seq(1,6), labels = c('PC','P1','P2','P3','P4','Market'))
+
+
+
+
+# PLOT 2
+# ======
+  
 medians  = c(median(df$enpv0), median(df$enpv1), median(df$enpv2), median(df$enpv3), median(df$enpv4), median(df$enpv5))
 means    = c(mean(df$enpv0),   mean(df$enpv1),   mean(df$enpv2),   mean(df$enpv3),   mean(df$enpv4),   mean(df$enpv5))
 mins     = c(min(df$enpv0),    min(df$enpv1),    min(df$enpv2),    min(df$enpv3),    min(df$enpv4),    min(df$enpv5))
