@@ -27,7 +27,7 @@ maxes    = c(max(df$enpv0),    max(df$enpv1),    max(df$enpv2),    max(df$enpv3)
 
 plot(
   seq(0,5),
-  ylab = 'ENPV',
+  ylab = 'ENPV   (min / mean / max)',
   xlab = 'Development followed by sales',
   ylim = c(min(df$enpv0,df$enpv1,df$enpv2,df$enpv3,df$enpv4,df$enpv5), max(df$enpv5)),
   las = 1,
