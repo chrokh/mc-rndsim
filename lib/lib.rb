@@ -42,21 +42,6 @@ class Phase
     @cash = cash
     @prob = prob
   end
-  def apply intervention
-    operator = intervention.operator
-    operand  = intervention.operand
-    property = intervention.property
-    case property
-    when 'revenue'
-      Phase.new(@time, @cost, @cash.send(operator, operand), @prob)
-    when 'cost'
-      cost = @cost.send(operator, operand)
-      cost = cost < 0 ? 0 : cost
-      Phase.new(@time, cost, @cash, @prob)
-    else
-      raise Error, 'Invalid intervention'
-    end
-  end
 end
 
 class Market
@@ -130,7 +115,7 @@ class World
   def apply intervention
     phases = @phases.map.with_index do |e,i|
       if i == intervention.phase.to_i
-        e.apply intervention
+        intervention.apply e
       else
         e
       end
@@ -166,7 +151,7 @@ class Simulation
     baseline = World.new(@phases, @market, @rate, @mini)
     deviations = @interventions.keys.map { |key|
       intervention = @interventions[key]
-      deviation = intervention.apply(baseline)
+      deviation    = baseline.apply(intervention)
       Hash[
         "#{key}intervention_phase"    => intervention.phase,
         "#{key}intervention_operator" => intervention.operator,
@@ -323,14 +308,23 @@ end
 
 class Intervention
   attr_reader :operator, :operand, :phase, :property
-  def initialize operator, operand, phase, property
+  def initialize operator, operand, target_phase, property
     @operator = operator
-    @operand = operand
-    @phase = phase
+    @operand = operand.to_f
+    @phase = target_phase
     @property = property
   end
-  def apply world
-    world.apply self
+  def apply phase
+    case @property
+    when 'revenue'
+      Phase.new(phase.time, phase.cost, phase.cash.send(@operator, @operand), phase.prob)
+    when 'cost'
+      cost = phase.cost.send(@operator, @operand)
+      cost = cost < 0 ? 0 : cost
+      Phase.new(phase.time, cost, phase.cash, phase.prob)
+    else
+      raise Error, 'Invalid intervention'
+    end
   end
 end
 
