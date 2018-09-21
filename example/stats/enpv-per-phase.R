@@ -23,6 +23,10 @@ axis(1, at = seq(1,6), labels = c('PC','P1','P2','P3','P4','Market'))
 # PLOT 2
 # ======
 
+mins  <- c(min(df$enpv0),  min(df$enpv1),  min(df$enpv2),  min(df$enpv3),  min(df$enpv4),  min(df$enpv5))
+means <- c(mean(df$enpv0), mean(df$enpv1), mean(df$enpv2), mean(df$enpv3), mean(df$enpv4), mean(df$enpv5))
+maxes <- c(max(df$enpv0),  max(df$enpv1),  max(df$enpv2),  max(df$enpv3),  max(df$enpv4),  max(df$enpv5))
+
 q1s <- c(quantile(df$enpv0)[2], quantile(df$enpv1)[2], quantile(df$enpv2)[2], quantile(df$enpv3)[2], quantile(df$enpv4)[2], quantile(df$enpv5)[2])
 q2s <- c(quantile(df$enpv0)[3], quantile(df$enpv1)[3], quantile(df$enpv2)[3], quantile(df$enpv3)[3], quantile(df$enpv4)[3], quantile(df$enpv5)[3])
 q3s <- c(quantile(df$enpv0)[4], quantile(df$enpv1)[4], quantile(df$enpv2)[4], quantile(df$enpv3)[4], quantile(df$enpv4)[4], quantile(df$enpv5)[4])
@@ -82,3 +86,4 @@ polygon(c(seq(1,6), rev(seq(1,6))), c(n4s, rev(n6s)), col = 'dodgerblue4', borde
 lines(means, col = 'black', lwd = 1)
 
 abline(0,0, col='black', lty=2)
+
