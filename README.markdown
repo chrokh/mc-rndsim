@@ -19,10 +19,10 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 
 # Usage
 
-`ruby main.rb [n] [agent.yaml] [phases.csv] [interventions.csv] [output.csv] [seed]`
+`ruby main.rb [n] [agents.csv] [phases.csv] [interventions.csv] [output.csv] [seed]`
 
 - `n` The number of samples/worlds/runs to generate and explore.
-- `params.yaml` Path to YAML file containing stochastic simulation parameters.
+- `agents.csv` Path to CSV file containing list of stochastic agents.
 - `phases.csv` Path to CSV file containing list of stochastic phases.
 - `interventions.csv` Path to CSV file containing list of stochastic interventions.
 - `output.csv` Path to output CSV file (which will be overwritten without prompting!).
@@ -31,11 +31,30 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 
 ## Agent parameters
 
-Agent parameters must be supplied in a simple YAML file with the following structure:
+Agents must be supplied in CSV format (`agents.csv` above), with headers, as per the spec below. The column order must not be changed. Every world when simulating will only contain a single agent that makes all decisions and the agent will be uniformly selected from the list of agents supplied as input. 
 
-```yaml
-discount_rate: FRAC
-threshold:     NUM
+The name parameter will be included in the generated output when simulating so that it is easy to tell from which agent distribution the sampled agent stemmed.
+
+```csv
+name,    discount_rate,  threshold
+STRING,  DIST(FRAC),     DIST(NUM)
+```
+
+Where:
+
+```
+DIST a    = a | UNIFORM a
+UNIFORM a = a"-"a
+NUM       = [0..INFINITY]
+FRAC      = [0..1]
+```
+
+The following is a valid example of an `agents.csv` file:
+
+```csv
+name,  discount_rate,  threshold
+a1,    0.8-0.11,       100
+a2,    0.3,            0
 ```
 
 
@@ -48,16 +67,7 @@ time,       cost,       revenue,    prob
 DIST(NUM),  DIST(NUM),  DIST(NUM),  DIST(FRAC)
 ```
 
-Where:
-
-```
-DIST a    = a | UNIFORM a
-UNIFORM a = a"-"a
-NUM       = [0..INFINITY]
-FRAC      = [0..1]
-```
-
-The following is a valid example of a `phases.csv` file.
+The following is a valid example of a `phases.csv` file:
 
 ```csv
 time,   cost,  revenue,  prob

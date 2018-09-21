@@ -86,15 +86,15 @@ class MarketDist
 end
 
 class World
-  def initialize phases, market, rate, mini
+  def initialize phases, market, agent
     @phases = phases
     @market = market
-    @rate = rate
-    @mini = mini
+    @agent  = agent
   end
   def decision_points
     @decision_points ||= ladder(@phases).map do |phases|
-      DecisionPoint.new (phases + @market.phases), @rate, @mini
+      # TODO: Should e.g. pass agent rather than extract params and then pass
+      DecisionPoint.new (phases + @market.phases), @agent.rate, @agent.mini
     end
   end
   def run name
@@ -102,15 +102,17 @@ class World
     gonos   = decision_points.map(&:decision)
     conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
     phases  = @phases + @market.phases
-    {
-      enpv:             enpvs,
-      decision:         gonos,
-      conseq_decision:  conseqs,
-      time:             phases.map(&:time),
-      cost:             phases.map(&:cost),
-      revenue:          phases.map(&:cash),
-      prob:             phases.map(&:prob),
-    }.map { |k,v| ["#{name}#{k}", v] }.to_h
+    @agent.to_h.merge(
+      {
+        enpv:             enpvs,
+        decision:         gonos,
+        conseq_decision:  conseqs,
+        time:             phases.map(&:time),
+        cost:             phases.map(&:cost),
+        revenue:          phases.map(&:cash),
+        prob:             phases.map(&:prob),
+      }.map { |k,v| ["#{name}#{k}", v] }.to_h
+    )
   end
   def apply effect
     phases = @phases.map.with_index do |e,i|
@@ -120,42 +122,38 @@ class World
         e
       end
     end
-    World.new(phases, @market, @rate, @mini)
+    World.new(phases, @market, @agent)
   end
 end
 
 class SimulationDist
-  def initialize config
-    @config = config
+  def initialize parser
+    @parser = parser
   end
   def sample!
     Simulation.new(
-      @config.phases.map { |p| p.sample! },
-      @config.market.sample!,
-      @config.rate.sample!,
-      @config.mini.sample!,
-      @config.interventions.sample!
+      @parser.phases.map { |p| p.sample! },
+      @parser.market.sample!,
+      @parser.agents.sample!,
+      @parser.interventions.sample!
     )
   end
 end
 
 class Simulation
-  def initialize phases, market, rate, mini, interventions
+  def initialize phases, market, agent, interventions
     @phases = phases
     @market = market
-    @rate = rate
-    @mini = mini
+    @agent  = agent
     @interventions = interventions
   end
   def run
-    baseline = World.new(@phases, @market, @rate, @mini)
-    deviations = @interventions.keys.map { |key|
-      @interventions[key].apply(baseline).run(key)
-    }.reduce(&:merge) || {}
-    {
-      discount_rate:         @rate,
-      threshold:             @mini,
-    }.merge(baseline.run('')).merge(deviations)
+    baseline = World.new(@phases, @market, @agent)
+    deviations =
+      @interventions.keys.map { |key| @interventions[key].apply(baseline).run(key) }
+      .reduce(&:merge) || {}
+
+    baseline.run('').merge(deviations)
   end
 end
 
@@ -294,6 +292,15 @@ class HashDist
   end
 end
 
+class PickDist
+  def initialize list
+    @list = list
+  end
+  def sample!
+    @list.sample
+  end
+end
+
 class InterventionDist
   def initialize effects
     @effects = effects
@@ -326,6 +333,37 @@ class Intervention
   end
   def apply world
     @effects.reduce(world) { |w, i| w.apply i }
+  end
+end
+
+class AgentDist
+  def initialize name, rate, mini
+    @name = name
+    @rate = rate
+    @mini = mini
+  end
+  def sample!
+    Agent.new(
+      @name,
+      @rate.sample!,
+      @mini.sample!
+    )
+  end
+end
+
+class Agent
+  attr_reader :rate, :mini
+  def initialize name, rate, mini
+    @name = name
+    @rate = rate
+    @mini = mini
+  end
+  def to_h
+    {
+      agent:         @name,
+      discount_rate: @rate,
+      threshold:     @mini
+    }
   end
 end
 
@@ -412,17 +450,42 @@ class DistParser
   end
 end
 
+class DoubleDist
+  def initialize dist
+    @dist = dist
+  end
+  def sample!
+    @dist.sample!.sample!
+  end
+end
+
+class AgentsParser
+  def initialize data
+    @data = data
+  end
+  def parse
+    DoubleDist.new(
+      PickDist.new(
+        CSVParser.new(@data).lines.map do |line|
+          AgentDist.new(
+            line[0],
+            DistParser.new(line[1]).parse,
+            DistParser.new(line[2]).parse
+          )
+        end
+      )
+    )
+  end
+end
+
 class InputParser
-  def initialize config, phases, interventions
-    @config = config
+  def initialize agents, phases, interventions
+    @agents = agents
     @phases = phases
     @interventions = interventions
   end
-  def mini
-    DistParser.new(@config['threshold']).parse
-  end
-  def rate
-    DistParser.new(@config['discount_rate']).parse
+  def agents
+    AgentsParser.new(@agents).parse
   end
   def market
     MarketParser.new(@phases).parse
@@ -437,15 +500,15 @@ end
 
 require 'yaml'
 class SimulationParser
-  def initialize config, phases, interventions
-    @config = config
+  def initialize agents, phases, interventions
+    @agents = agents
     @phases = phases
     @interventions = interventions
   end
   def parse
     SimulationDist.new(
       InputParser.new(
-        YAML.load_file(@config),
+        File.read(@agents),
         File.read(@phases),
         File.read(@interventions),
       ))
