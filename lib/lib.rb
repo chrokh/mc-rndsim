@@ -221,10 +221,10 @@ class MarketParser
   def parse
     line = CSVParser.new(@data).lines.last
     MarketDist.new(
-      parse_dist(line[0]),
-      parse_dist(line[1]),
-      parse_dist(line[2]),
-      parse_dist(line[3]),
+      DistParser.new(line[0]).parse,
+      DistParser.new(line[1]).parse,
+      DistParser.new(line[2]).parse,
+      DistParser.new(line[3]).parse,
     )
   end
 end
@@ -237,10 +237,10 @@ class PhasesParser
     lines = CSVParser.new(@data).lines
     lines[0..lines.length-2].map do |line|
       PhaseDist.new(
-        parse_dist(line[0]),
-        parse_dist(line[1]),
-        parse_dist(line[2]),
-        parse_dist(line[3]),
+        DistParser.new(line[0]).parse,
+        DistParser.new(line[1]).parse,
+        DistParser.new(line[2]).parse,
+        DistParser.new(line[3]).parse,
       )
     end
   end
@@ -269,8 +269,8 @@ class InterventionsParser
         line[0],
         InterventionDist.new(
           line[3],
-          parse_dist(line[4]),
-          parse_dist(line[1]),
+          DistParser.new(line[4]).parse,
+          DistParser.new(line[1]).parse,
           line[2]
         )]
     end.reduce(&:merge)
@@ -328,15 +328,6 @@ class Intervention
   end
 end
 
-def parse_dist dist
-  if dist.to_s.index '-'
-    args = dist.split('-')
-    UniDist.new args[0], args[1]
-  else
-    ValDist.new dist
-  end
-end
-
 class Writer
   def initialize output
     @output = output
@@ -384,6 +375,20 @@ class CSVFormatter
   end
 end
 
+class DistParser
+  def initialize data
+    @data = data
+  end
+  def parse
+    if @data.to_s.index '-'
+      args = @data.split('-')
+      UniDist.new args[0], args[1]
+    else
+      ValDist.new @data
+    end
+  end
+end
+
 class InputParser
   def initialize config, phases, interventions
     @config = config
@@ -391,10 +396,10 @@ class InputParser
     @interventions = interventions
   end
   def mini
-    parse_dist @config['threshold']
+    DistParser.new(@config['threshold']).parse
   end
   def rate
-    parse_dist @config['discount_rate']
+    DistParser.new(@config['discount_rate']).parse
   end
   def market
     MarketParser.new(@phases).parse
