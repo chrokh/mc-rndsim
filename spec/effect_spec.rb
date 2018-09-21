@@ -1,10 +1,10 @@
 require 'lib'
 
 
-describe Intervention do
+describe Effect do
 
   context '#apply' do
-    let (:result) { Intervention.new(operator, operand, nil, property).apply(phase) }
+    let (:result) { Effect.new(operator, operand, nil, property).apply(phase) }
     let (:phase) { Phase.new 10, 5, 50, 0.5 }
 
 

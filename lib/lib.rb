@@ -53,7 +53,7 @@ class Market
     @prob = prob
   end
   def phases
-    x = @time.to_i.times.map do |t|
+    @time.to_i.times.map do |t|
 
       # cash (TODO: refactor into interpolation class and test)
       y2   = @cash / (@time + 1) * 2
@@ -112,10 +112,10 @@ class World
       prob:             phases.map(&:prob),
     }.map { |k,v| ["#{name}#{k}", v] }.to_h
   end
-  def apply intervention
+  def apply effect
     phases = @phases.map.with_index do |e,i|
-      if i == intervention.phase.to_i
-        intervention.apply e
+      if i == effect.phase.to_i
+        effect.apply e
       else
         e
       end
@@ -150,14 +150,7 @@ class Simulation
   def run
     baseline = World.new(@phases, @market, @rate, @mini)
     deviations = @interventions.keys.map { |key|
-      intervention = @interventions[key]
-      deviation    = baseline.apply(intervention)
-      Hash[
-        "#{key}intervention_phase"    => intervention.phase,
-        "#{key}intervention_operator" => intervention.operator,
-        "#{key}intervention_operand"  => intervention.operand,
-        "#{key}intervention_property" => intervention.property,
-      ].merge(deviation.run(key))
+      @interventions[key].apply(baseline).run(key)
     }.reduce(&:merge) || {}
     {
       discount_rate:         @rate,
@@ -259,26 +252,38 @@ class CSVParser
   end
 end
 
+class EffectParser
+  def initialize data
+    @data = data
+  end
+  def parse
+    EffectDist.new(
+      @data[3],
+      DistParser.new(@data[4]).parse,
+      DistParser.new(@data[1]).parse,
+      @data[2]
+    )
+  end
+end
+
 class InterventionsParser
   def initialize data
     @data = data
   end
   def parse
-    interventions = CSVParser.new(@data).lines.map do |line|
-      Hash[
-        line[0],
-        InterventionDist.new(
-          line[3],
-          DistParser.new(line[4]).parse,
-          DistParser.new(line[1]).parse,
-          line[2]
-        )]
+    lines = CSVParser.new(@data).lines
+    interventions = lines.map(&:first).map do |id|
+      effects = lines
+        .select { |l| l[0] == id }
+        .map { |e| EffectParser.new(e).parse }
+      intervention = InterventionDist.new(effects)
+      Hash[id, intervention]
     end.reduce(&:merge)
-    MultiDist.new(interventions)
+    HashDist.new(interventions)
   end
 end
 
-class MultiDist
+class HashDist
   def initialize hash
     @hash = Hash(hash)
   end
@@ -290,6 +295,15 @@ class MultiDist
 end
 
 class InterventionDist
+  def initialize effects
+    @effects = effects
+  end
+  def sample!
+    Intervention.new(@effects.map(&:sample!))
+  end
+end
+
+class EffectDist
   def initialize operator, operand, phase, property
     @operator = operator
     @operand = operand
@@ -297,7 +311,7 @@ class InterventionDist
     @property = property
   end
   def sample!
-    Intervention.new(
+    Effect.new(
       @operator,
       @operand.sample!,
       @phase.sample!.round,
@@ -307,6 +321,15 @@ class InterventionDist
 end
 
 class Intervention
+  def initialize effects
+    @effects = effects
+  end
+  def apply world
+    @effects.reduce(world) { |w, i| w.apply i }
+  end
+end
+
+class Effect
   attr_reader :operator, :operand, :phase, :property
   def initialize operator, operand, target_phase, property
     @operator = operator
@@ -323,7 +346,7 @@ class Intervention
       cost = cost < 0 ? 0 : cost
       Phase.new(phase.time, cost, phase.cash, phase.prob)
     else
-      raise Error, 'Invalid intervention'
+      raise Error, 'Invalid intervention effect'
     end
   end
 end
