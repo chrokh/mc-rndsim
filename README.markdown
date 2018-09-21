@@ -19,19 +19,33 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 
 # Usage
 
-`ruby main.rb [n] [agents.csv] [phases.csv] [interventions.csv] [output.csv] [seed]`
+```
+ruby main.rb [N] [AGENTS] [PHASES] [INTERVENTIONS] [OUTPUT] [SEED]
 
-- `n` The number of samples/worlds/runs to generate and explore.
-- `agents.csv` Path to CSV file containing list of stochastic agents.
-- `phases.csv` Path to CSV file containing list of stochastic phases.
-- `interventions.csv` Path to CSV file containing list of stochastic interventions.
-- `output.csv` Path to output CSV file (which will be overwritten without prompting!).
-- `seed` (optional) An integer to seed the randomizer.
+N
+The number of samples/worlds/runs to generate and explore.
+
+AGENTS
+Path to CSV file containing list of stochastic agents.
+
+PHASES
+Path to CSV file containing list of stochastic phases.
+
+INTERVENTIONS
+Path to CSV file containing list of stochastic interventions.
+
+OUTPUT
+Path to output CSV file (which will be overwritten without prompting!).
+
+SEED
+(optional) An integer to seed the randomizer.
+```
+
 
 
 ## Agent parameters
 
-Agents must be supplied in CSV format (`agents.csv` above), with headers, as per the spec below. The column order must not be changed. Every world when simulating will only contain a single agent that makes all decisions and the agent will be uniformly selected from the list of agents supplied as input. 
+Agents must be supplied in CSV format (`AGENTS` above), with headers, as per the spec below. The column order must not be changed. Every world when simulating will only contain a single agent that makes all decisions and the agent will be uniformly selected from the list of agents supplied as input. 
 
 The name parameter will be included in the generated output when simulating so that it is easy to tell from which agent distribution the sampled agent stemmed.
 
@@ -49,7 +63,7 @@ NUM       = [0..INFINITY]
 FRAC      = [0..1]
 ```
 
-The following is a valid example of an `agents.csv` file:
+The following is a valid example of an `AGENTS` csv file:
 
 ```csv
 name,  discount_rate,  threshold
@@ -60,14 +74,14 @@ a2,    0.3,            0
 
 ## Phase parameters
 
-Phases must be supplied in CSV format (`phases.csv` above), with headers, as per the spec below. The column order must not be changed.
+Phases must be supplied in CSV format (`PHASES` above), with headers, as per the spec below. The column order must not be changed.
 
 ```csv
 time,       cost,       revenue,    prob
 DIST(NUM),  DIST(NUM),  DIST(NUM),  DIST(FRAC)
 ```
 
-The following is a valid example of a `phases.csv` file:
+The following is a valid example of a `PHASES` csv file:
 
 ```csv
 time,   cost,  revenue,  prob
@@ -98,7 +112,7 @@ time,  cost,  revenue,  prob
 
 ## Interventions parameters
 
-Interventions must be supplied in CSV format (`interventions.csv` above), with headers, as per the spec below. The column order must not be changed.
+Interventions must be supplied in CSV format (`INTERVENTIONS` above), with headers, as per the spec below. The column order must not be changed.
 
 ```csv
 name,    phase,      property,  operator,  operand
@@ -118,7 +132,7 @@ If the same `name` is used on multiple rows then these effects will all be appli
 
 If the interventions input file is empty then the baseline world (i.e. whatever is described in the phases and config inputs) will still be explored.
 
-The following is a valid example of an interventions file:
+The following is a valid example of an `INTERVENTIONS` csv file:
 
 ```csv
 name,    phase,  property,  operator,  operand
