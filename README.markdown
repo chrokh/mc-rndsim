@@ -7,7 +7,7 @@ Agent parameters are:
 - Discount rate
 - Threshold (i.e. minimum ENPV required for a go-decision)
 
-Phase parameters are:
+Phase (and market) parameters are:
 
 - Time (i.e. phase duration expressed in years)
 - Cost
@@ -19,7 +19,7 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 
 # Usage
 
-`ruby main.rb [n] [params.yaml] [phases.csv] [interventions.csv] [output.csv] [seed]`
+`ruby main.rb [n] [agent.yaml] [phases.csv] [interventions.csv] [output.csv] [seed]`
 
 - `n` The number of samples/worlds/runs to generate and explore.
 - `params.yaml` Path to YAML file containing stochastic simulation parameters.
@@ -27,6 +27,103 @@ We are specifically employing this Monte Carlo simulation to explore the effects
 - `interventions.csv` Path to CSV file containing list of stochastic interventions.
 - `output.csv` Path to output CSV file (which will be overwritten without prompting!).
 - `seed` (optional) An integer to seed the randomizer.
+
+
+## Agent parameters
+
+Agent parameters must be supplied in a simple YAML file with the following structure:
+
+```yaml
+discount_rate: FRAC
+threshold:     NUM
+```
+
+
+## Phase parameters
+
+Phases must be supplied in CSV format (`phases.csv` above), with headers, as per the spec below. The column order must not be changed.
+
+```csv
+time,       cost,       revenue,    prob
+DIST(NUM),  DIST(NUM),  DIST(NUM),  DIST(FRAC)
+```
+
+Where:
+
+```
+DIST a    = a | UNIFORM a
+UNIFORM a = a"-"a
+NUM       = [0..INFINITY]
+FRAC      = [0..1]
+```
+
+The following is a valid example of a `phases.csv` file.
+
+```csv
+time,   cost,  revenue,  prob
+2.2-5,  2,     0,        0.5
+8,      2.5-8, 0,        0.9
+10,     10.5,  100,      0.4-0.3
+```
+
+The phases csv file *must* contain at least two entries, since the last entry is assumed to be the market. As opposed to all other phases, the market will be converted from a single phase spanning multiple years into multiple phases each spanning a single year. Revenues and costs are assumed to linearly increase over the time period, while probability of success is assumed to remain constant.
+
+To exemplify, the following market...
+
+```csv
+time,   cost,  revenue,  prob
+3       100    1000      0.5
+```
+
+...would be converted into:
+
+```csv
+time,  cost,  revenue,  prob
+1,     10,    100,      0.8408964152537145
+1,     20,    200,      0.8408964152537145
+1,     30,    300,      0.8408964152537145
+1,     40,    400,      0.8408964152537145
+```
+
+
+## Interventions parameters
+
+Interventions must be supplied in CSV format (`interventions.csv` above), with headers, as per the spec below. The column order must not be changed.
+
+```csv
+name,    phase,      property,  operator,  operand
+STRING,  DIST(INT),  PROP,      OPERATOR,  DIST(NUM)
+```
+
+Where, beyond the previously defined data types, the following definitions also hold:
+
+```
+PROP     = "REVENUE" | "COST" | "TIME" | "PROB"
+OPERATOR = "+" | "-" | "*" | "/"
+```
+
+The `name` parameter will be used in the generated output when the simulation is run to identify worlds where a sample from the described intervention distribution have been used to alter the baseline phase input.
+
+If the same `name` is used on multiple rows then these effects will all be applied (in the order that they are listed) whenever an intervention is applied. The interventions input csv file can therefore be thought of as listing interventions by listing intervention effects.
+
+If the interventions input file is empty then the baseline world (i.e. whatever is described in the phases and config inputs) will still be explored.
+
+The following is a valid example of an interventions file:
+
+```csv
+name,    phase,  property,  operator,  operand
+prize,   0-5,    revenue,   +,         0-2000
+free,    0,      cost,      *,         0
+free,    1,      cost,      *,         0
+free,    2,      cost,      *,         0
+```
+
+In natural language the above example describes two interventions. One named `prize` and the other `free`. The former intervention (`prize`) consists of a single effect, while the latter has three effects. The former adds anything between 0 and 2000 to the revenue property of any of the phases between 0 and 5. Which phase it will be and how much it will add depends on what samples are drawn from the distributions in any given world. The latter intervention (`free`) reduces the cost of the first 3 phases (i.e. number 0, 2 and 1) down to zero, effectively making them free. The effects are applied in the order in which they appear, but in this particular example, the order of application does not affect the end result.
+
+
+
+
+
 
 
 # Example
