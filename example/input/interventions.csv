@@ -1,2 +1,2 @@
-name,  phase,  property,  operator,  operand
-i1_,   0-5,    revenue,   +,         0-2000
+name,   phase,  property,  operator,  operand
+prize,  0-5,    revenue,   +,         0-2000
