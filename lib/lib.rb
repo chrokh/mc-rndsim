@@ -384,7 +384,7 @@ class Effect
       cost = cost < 0 ? 0 : cost
       Phase.new(phase.time, cost, phase.cash, phase.prob)
     else
-      raise Error, 'Invalid intervention effect'
+      raise 'Invalid intervention effect'
     end
   end
 end
