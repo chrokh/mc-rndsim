@@ -86,7 +86,9 @@ class MarketDist
 end
 
 class World
-  def initialize phases, market, agent
+  def initialize id, group, phases, market, agent
+    @id     = id
+    @group  = group
     @phases = phases
     @market = market
     @agent  = agent
@@ -97,12 +99,17 @@ class World
       DecisionPoint.new (phases + @market.phases), @agent.rate, @agent.mini
     end
   end
-  def run name
+  def run
     enpvs   = decision_points.map(&:enpv)
     gonos   = decision_points.map(&:decision)
     conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
     phases  = @phases + @market.phases
-    @agent.to_h.merge(
+    (
+      {
+        id:               @id,
+        group:            @group,
+      }
+    ).merge(@agent.to_h).merge(
       {
         enpv:             enpvs,
         decision:         gonos,
@@ -111,7 +118,7 @@ class World
         cost:             phases.map(&:cost),
         revenue:          phases.map(&:cash),
         prob:             phases.map(&:prob),
-      }.map { |k,v| ["#{name}#{k}", v] }.to_h
+      }
     )
   end
   def apply effect
@@ -122,7 +129,7 @@ class World
         e
       end
     end
-    World.new(phases, @market, @agent)
+    World.new(@id, effect.group, phases, @market, @agent)
   end
 end
 
@@ -147,13 +154,10 @@ class Simulation
     @agent  = agent
     @interventions = interventions
   end
-  def run
-    baseline = World.new(@phases, @market, @agent)
-    deviations =
-      @interventions.keys.map { |key| @interventions[key].apply(baseline).run(key) }
-      .reduce(&:merge) || {}
-
-    baseline.run('').merge(deviations)
+  def run id
+    baseline   = World.new(id, 'base', @phases, @market, @agent)
+    deviations = @interventions.map { |i| i.apply(baseline) }
+    [baseline.run] + deviations.map(&:run)
   end
 end
 
@@ -256,6 +260,7 @@ class EffectParser
   end
   def parse
     EffectDist.new(
+      @data[0],
       @data[3],
       DistParser.new(@data[4]).parse,
       DistParser.new(@data[1]).parse,
@@ -270,25 +275,23 @@ class InterventionsParser
   end
   def parse
     lines = CSVParser.new(@data).lines
-    interventions = lines.map(&:first).map do |id|
-      effects = lines
-        .select { |l| l[0] == id }
-        .map { |e| EffectParser.new(e).parse }
-      intervention = InterventionDist.new(effects)
-      Hash[id, intervention]
-    end.reduce(&:merge)
-    HashDist.new(interventions)
+    ListDist.new(
+      lines.map(&:first).map do |id|
+        effects = lines
+          .select { |l| l[0] == id }
+          .map { |e| EffectParser.new(e).parse }
+        intervention = InterventionDist.new(effects)
+      end
+    )
   end
 end
 
-class HashDist
-  def initialize hash
-    @hash = Hash(hash)
+class ListDist
+  def initialize list
+    @list = list
   end
   def sample!
-    @hash.keys.map do |key|
-      Hash[key, @hash[key].sample!]
-    end.reduce(&:merge) || {}
+    @list.map(&:sample!)
   end
 end
 
@@ -311,7 +314,8 @@ class InterventionDist
 end
 
 class EffectDist
-  def initialize operator, operand, phase, property
+  def initialize group, operator, operand, phase, property
+    @group = group
     @operator = operator
     @operand = operand
     @phase = phase
@@ -319,6 +323,7 @@ class EffectDist
   end
   def sample!
     Effect.new(
+      @group,
       @operator,
       @operand.sample!,
       @phase.sample!.round,
@@ -368,8 +373,9 @@ class Agent
 end
 
 class Effect
-  attr_reader :operator, :operand, :phase, :property
-  def initialize operator, operand, target_phase, property
+  attr_reader :group, :operator, :operand, :phase, :property
+  def initialize group, operator, operand, target_phase, property
+    @group = group
     @operator = operator
     @operand = operand.to_f
     @phase = target_phase
@@ -420,26 +426,20 @@ class Writer
 end
 
 class CSVFormatter
-  def initialize data
-    @data = data
+  def initialize rows
+    @rows = rows
   end
   def header
-    @data.keys.map { |k|
-      if @data[k].is_a? Array
-        @data[k].length.times.map { |n| "#{k}#{n}" }.join(',')
+    @rows.first.keys.map { |k|
+      if @rows.first[k].is_a? Array
+        @rows.first[k].length.times.map { |n| "#{k}#{n}" }.join(',')
       else
         k
       end
     }.join(',')
   end
   def data
-    @data.values.map do |v|
-      if v.is_a? Array
-        v.join(',')
-      else
-        v
-      end
-    end.join(',')
+    @rows.map { |r| r.values.join(',') }.join("\r\n")
   end
 end
 

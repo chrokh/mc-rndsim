@@ -5,7 +5,7 @@ def run n, input1, input2, input3, output, seed
   writer = Writer.new output
   dist   = SimulationParser.new(input1, input2, input3).parse
   n.times do |i|
-    writer.append (dist.sample!.run)
+    writer.append (dist.sample!.run(i))
     if (i > 0 && i % 100 == 0) || (i+1) == n
       system "clear" or system "cls"
       puts "#{((i+1) / n.to_f * 100).round} %"

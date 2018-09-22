@@ -1,50 +1,53 @@
 df <- read.csv("./output/example.csv")
 
+# Only use observations with no intervention
+tmp <- subset(df, df$group == 'base')
+
 # Cashflow per phase
-df$cash0 <- df$revenue0 - df$cost0
-df$cash1 <- df$revenue1 - df$cost1
-df$cash2 <- df$revenue2 - df$cost2
-df$cash3 <- df$revenue3 - df$cost3
-df$cash4 <- df$revenue4 - df$cost4
-df$cash5 <- df$revenue5 - df$cost5
-df$cash6 <- df$revenue6 - df$cost6
-df$cash7 <- df$revenue7 - df$cost7
-df$cash8 <- df$revenue8 - df$cost8
-df$cash9 <- df$revenue9 - df$cost9
-df$cash10 <- df$revenue10 - df$cost10
-df$cash11 <- df$revenue11 - df$cost11
-df$cash12 <- df$revenue12 - df$cost12
-df$cash13 <- df$revenue13 - df$cost13
-df$cash14 <- df$revenue14 - df$cost14
-df$cash15 <- df$revenue15 - df$cost15
+tmp$cash0 <- tmp$revenue0 - tmp$cost0
+tmp$cash1 <- tmp$revenue1 - tmp$cost1
+tmp$cash2 <- tmp$revenue2 - tmp$cost2
+tmp$cash3 <- tmp$revenue3 - tmp$cost3
+tmp$cash4 <- tmp$revenue4 - tmp$cost4
+tmp$cash5 <- tmp$revenue5 - tmp$cost5
+tmp$cash6 <- tmp$revenue6 - tmp$cost6
+tmp$cash7 <- tmp$revenue7 - tmp$cost7
+tmp$cash8 <- tmp$revenue8 - tmp$cost8
+tmp$cash9 <- tmp$revenue9 - tmp$cost9
+tmp$cash10 <- tmp$revenue10 - tmp$cost10
+tmp$cash11 <- tmp$revenue11 - tmp$cost11
+tmp$cash12 <- tmp$revenue12 - tmp$cost12
+tmp$cash13 <- tmp$revenue13 - tmp$cost13
+tmp$cash14 <- tmp$revenue14 - tmp$cost14
+tmp$cash15 <- tmp$revenue15 - tmp$cost15
 
 # Cumulative cashflow per phase
-df$ccash0  <- df$cash0
-df$ccash1  <- df$cash1  + df$ccash0
-df$ccash2  <- df$cash2  + df$ccash1
-df$ccash3  <- df$cash3  + df$ccash2
-df$ccash4  <- df$cash4  + df$ccash3
-df$ccash5  <- df$cash5  + df$ccash4
-df$ccash6  <- df$cash6  + df$ccash5
-df$ccash7  <- df$cash7  + df$ccash6
-df$ccash8  <- df$cash8  + df$ccash7
-df$ccash9  <- df$cash9  + df$ccash8
-df$ccash10 <- df$cash10 + df$ccash9
-df$ccash11 <- df$cash11 + df$ccash10
-df$ccash12 <- df$cash12 + df$ccash11
-df$ccash13 <- df$cash13 + df$ccash12
-df$ccash14 <- df$cash14 + df$ccash13
-df$ccash15 <- df$cash15 + df$ccash14
+tmp$ccash0  <- tmp$cash0
+tmp$ccash1  <- tmp$cash1  + tmp$ccash0
+tmp$ccash2  <- tmp$cash2  + tmp$ccash1
+tmp$ccash3  <- tmp$cash3  + tmp$ccash2
+tmp$ccash4  <- tmp$cash4  + tmp$ccash3
+tmp$ccash5  <- tmp$cash5  + tmp$ccash4
+tmp$ccash6  <- tmp$cash6  + tmp$ccash5
+tmp$ccash7  <- tmp$cash7  + tmp$ccash6
+tmp$ccash8  <- tmp$cash8  + tmp$ccash7
+tmp$ccash9  <- tmp$cash9  + tmp$ccash8
+tmp$ccash10 <- tmp$cash10 + tmp$ccash9
+tmp$ccash11 <- tmp$cash11 + tmp$ccash10
+tmp$ccash12 <- tmp$cash12 + tmp$ccash11
+tmp$ccash13 <- tmp$cash13 + tmp$ccash12
+tmp$ccash14 <- tmp$cash14 + tmp$ccash13
+tmp$ccash15 <- tmp$cash15 + tmp$ccash14
 
-means = c(0, mean(df$ccash0), mean(df$ccash1), mean(df$ccash2), mean(df$ccash3), mean(df$ccash4), mean(df$ccash5), mean(df$ccash6), mean(df$ccash7), mean(df$ccash8), mean(df$ccash9), mean(df$ccash10), mean(df$ccash11), mean(df$ccash12), mean(df$ccash13), mean(df$ccash14), mean(df$ccash15))
-mins  = c(0, min(df$ccash0),  min(df$ccash1),  min(df$ccash2),  min(df$ccash3),  min(df$ccash4),  min(df$ccash5),  min(df$ccash6),  min(df$ccash7),  min(df$ccash8),  min(df$ccash9),  min(df$ccash10),  min(df$ccash11),  min(df$ccash12),  min(df$ccash13),  min(df$ccash14),  min(df$ccash15))
-maxes = c(0, max(df$ccash0),  max(df$ccash1),  max(df$ccash2),  max(df$ccash3),  max(df$ccash4),  max(df$ccash5),  max(df$ccash6),  max(df$ccash7),  max(df$ccash8),  max(df$ccash9),  max(df$ccash10),  max(df$ccash11),  max(df$ccash12),  max(df$ccash13),  max(df$ccash14),  max(df$ccash15))
+means = c(0, mean(tmp$ccash0), mean(tmp$ccash1), mean(tmp$ccash2), mean(tmp$ccash3), mean(tmp$ccash4), mean(tmp$ccash5), mean(tmp$ccash6), mean(tmp$ccash7), mean(tmp$ccash8), mean(tmp$ccash9), mean(tmp$ccash10), mean(tmp$ccash11), mean(tmp$ccash12), mean(tmp$ccash13), mean(tmp$ccash14), mean(tmp$ccash15))
+mins  = c(0, min(tmp$ccash0),  min(tmp$ccash1),  min(tmp$ccash2),  min(tmp$ccash3),  min(tmp$ccash4),  min(tmp$ccash5),  min(tmp$ccash6),  min(tmp$ccash7),  min(tmp$ccash8),  min(tmp$ccash9),  min(tmp$ccash10),  min(tmp$ccash11),  min(tmp$ccash12),  min(tmp$ccash13),  min(tmp$ccash14),  min(tmp$ccash15))
+maxes = c(0, max(tmp$ccash0),  max(tmp$ccash1),  max(tmp$ccash2),  max(tmp$ccash3),  max(tmp$ccash4),  max(tmp$ccash5),  max(tmp$ccash6),  max(tmp$ccash7),  max(tmp$ccash8),  max(tmp$ccash9),  max(tmp$ccash10),  max(tmp$ccash11),  max(tmp$ccash12),  max(tmp$ccash13),  max(tmp$ccash14),  max(tmp$ccash15))
 
 plot(
   means,
   ylab = 'Cumulative cashflow (min / mean / max)',
   xlab = 'Development followed by sales',
-  ylim = c(min(df$ccash4), max(df$ccash15)),
+  ylim = c(min(tmp$ccash4), max(tmp$ccash15)),
   las = 1,
   xaxt = 'n',
   type = 'n'

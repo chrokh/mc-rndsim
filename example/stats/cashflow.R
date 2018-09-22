@@ -1,40 +1,43 @@
 df <- read.csv("./output/example.csv")
 
+# Only use observations with no intervention
+tmp <- subset(df, df$group == 'base')
+
 # Cashflow per phase
-df$cash0 <- df$revenue0 - df$cost0
-df$cash1 <- df$revenue1 - df$cost1
-df$cash2 <- df$revenue2 - df$cost2
-df$cash3 <- df$revenue3 - df$cost3
-df$cash4 <- df$revenue4 - df$cost4
-df$cash5 <- df$revenue5 - df$cost5
-df$cash6 <- df$revenue6 - df$cost6
-df$cash7 <- df$revenue7 - df$cost7
-df$cash8 <- df$revenue8 - df$cost8
-df$cash9 <- df$revenue9 - df$cost9
-df$cash10 <- df$revenue10 - df$cost10
-df$cash11 <- df$revenue11 - df$cost11
-df$cash12 <- df$revenue12 - df$cost12
-df$cash13 <- df$revenue13 - df$cost13
-df$cash14 <- df$revenue14 - df$cost14
-df$cash15 <- df$revenue15 - df$cost15
+tmp$cash0 <- tmp$revenue0 - tmp$cost0
+tmp$cash1 <- tmp$revenue1 - tmp$cost1
+tmp$cash2 <- tmp$revenue2 - tmp$cost2
+tmp$cash3 <- tmp$revenue3 - tmp$cost3
+tmp$cash4 <- tmp$revenue4 - tmp$cost4
+tmp$cash5 <- tmp$revenue5 - tmp$cost5
+tmp$cash6 <- tmp$revenue6 - tmp$cost6
+tmp$cash7 <- tmp$revenue7 - tmp$cost7
+tmp$cash8 <- tmp$revenue8 - tmp$cost8
+tmp$cash9 <- tmp$revenue9 - tmp$cost9
+tmp$cash10 <- tmp$revenue10 - tmp$cost10
+tmp$cash11 <- tmp$revenue11 - tmp$cost11
+tmp$cash12 <- tmp$revenue12 - tmp$cost12
+tmp$cash13 <- tmp$revenue13 - tmp$cost13
+tmp$cash14 <- tmp$revenue14 - tmp$cost14
+tmp$cash15 <- tmp$revenue15 - tmp$cost15
 
 boxplot(
-  df$cash0,
-  df$cash1,
-  df$cash2,
-  df$cash3,
-  df$cash4,
-  df$cash5,
-  df$cash6,
-  df$cash7,
-  df$cash8,
-  df$cash9,
-  df$cash10,
-  df$cash11,
-  df$cash12,
-  df$cash13,
-  df$cash14,
-  df$cash15,
+  tmp$cash0,
+  tmp$cash1,
+  tmp$cash2,
+  tmp$cash3,
+  tmp$cash4,
+  tmp$cash5,
+  tmp$cash6,
+  tmp$cash7,
+  tmp$cash8,
+  tmp$cash9,
+  tmp$cash10,
+  tmp$cash11,
+  tmp$cash12,
+  tmp$cash13,
+  tmp$cash14,
+  tmp$cash15,
   col = 'bisque1',
   xlab = 'Development followed by sales',
   ylab = 'Cumulative cashflow'
