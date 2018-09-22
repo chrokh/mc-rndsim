@@ -377,14 +377,21 @@ class Effect
   end
   def apply phase
     case @property
-    when 'revenue'
-      Phase.new(phase.time, phase.cost, phase.cash.send(@operator, @operand), phase.prob)
+    when 'time'
+      x = phase.time.send(@operator, @operand)
+      Phase.new(x, phase.cost, phase.cash, phase.prob)
     when 'cost'
-      cost = phase.cost.send(@operator, @operand)
-      cost = cost < 0 ? 0 : cost
-      Phase.new(phase.time, cost, phase.cash, phase.prob)
+      x = phase.cost.send(@operator, @operand)
+      x = x < 0 ? 0 : x
+      Phase.new(phase.time, x, phase.cash, phase.prob)
+    when 'revenue'
+      x = phase.cash.send(@operator, @operand)
+      Phase.new(phase.time, phase.cost, x, phase.prob)
+    when 'prob'
+      x = phase.prob.send(@operator, @operand)
+      Phase.new(phase.time, phase.cost, phase.cash, x)
     else
-      raise 'Invalid intervention effect'
+      raise 'Unknown operator in intervention effect.'
     end
   end
 end
