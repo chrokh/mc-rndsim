@@ -18,4 +18,8 @@ source('stats/enpv-per-phase.R')
 print('stats/notogo.R')
 source('stats/notogo.R')
 
+print('stats/interventions.R')
+source('stats/interventions.R')
+
+
 dev.off()
