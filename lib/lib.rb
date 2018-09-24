@@ -29,7 +29,7 @@ class PhaseDist
       @time.sample!,
       @cost.sample!,
       @cash.sample!,
-      @prob.sample!
+      (1 - @prob.sample!), # Convert RoF to PoS
     )
   end
 end
@@ -41,6 +41,9 @@ class Phase
     @cost = cost
     @cash = cash
     @prob = prob
+    if prob <= 0 || prob > 1
+      raise 'Probability of a phase outside range (0,1]!'
+    end
   end
 end
 
@@ -81,7 +84,8 @@ class MarketDist
     @prob = prob
   end
   def sample!
-    Market.new(@time.sample!, @cost.sample!, @cash.sample!, @prob.sample!)
+    prob = 1 - @prob.sample! # Convert RoF to PoS
+    Market.new(@time.sample!, @cost.sample!, @cash.sample!, prob)
   end
 end
 
