@@ -159,14 +159,14 @@ cd example
 ruby ../main.rb 10000 input/config.yaml input/phases.csv input/interventions.csv output/example.csv 1
 ```
 
-In the example folder you will in `example/stats` find a bunch of R script that produce a number of different plots. The R scripts assume that your current working directory (`cwd`) is the `example` folder. When using the `rscript` command in a terminal your `cwd` is the folder from which you execute the scripts.
+In the example folder you will in `example/stats` find a bunch of R script that produce a number of different plots. The R scripts assume that your current working directory (`wd`) is the `example` folder. When using the `rscript` command in a terminal your `wd` is the folder from which you execute the scripts.
 
 ```bash
 cd example
 rscript stats/cumulative-cashflow-01.R
 ```
 
-If you're using RStudio you can manually set the working directory using the `cwd` command, or remove the lines from the example R scripts that read the output files and manually read them yourself.
+If you're using RStudio you can manually set the working directory using the `setwd` command, or remove the lines from the example R scripts that read the output files and manually read them yourself.
 
 For convenience you can run the script `all.R`, which will source all scripts in `example/stats` and write all plots to a single pdf file.
 
