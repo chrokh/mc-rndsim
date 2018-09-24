@@ -275,12 +275,14 @@ class InterventionsParser
   end
   def parse
     lines = CSVParser.new(@data).lines
+    keys  = lines.map(&:first).uniq
     ListDist.new(
-      lines.map(&:first).map do |id|
-        effects = lines
-          .select { |l| l[0] == id }
+      keys.map do |key|
+        InterventionDist.new(
+          lines
+          .select { |l| l.first == key }
           .map { |e| EffectParser.new(e).parse }
-        intervention = InterventionDist.new(effects)
+        )
       end
     )
   end
