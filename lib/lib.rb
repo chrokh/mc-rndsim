@@ -403,7 +403,7 @@ class Effect
       x = phase.prob.send(@operator, @operand)
       Phase.new(phase.time, phase.cost, phase.cash, x)
     else
-      raise 'Unknown operator in intervention effect.'
+      raise "Unknown property (#{@property}) in intervention effect."
     end
   end
 end
