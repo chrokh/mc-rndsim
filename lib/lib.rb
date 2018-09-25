@@ -29,7 +29,7 @@ class PhaseDist
       @time.sample!,
       @cost.sample!,
       @cash.sample!,
-      (1 - @prob.sample!), # Convert RoF to PoS
+      @prob.sample!,
     )
   end
 end
@@ -84,8 +84,7 @@ class MarketDist
     @prob = prob
   end
   def sample!
-    prob = 1 - @prob.sample! # Convert RoF to PoS
-    Market.new(@time.sample!, @cost.sample!, @cash.sample!, prob)
+    Market.new(@time.sample!, @cost.sample!, @cash.sample!, @prob.sample!)
   end
 end
 

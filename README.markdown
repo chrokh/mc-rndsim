@@ -12,7 +12,7 @@ Phase (and market) parameters are:
 - Time (i.e. phase duration expressed in years)
 - Cost
 - Revenue
-- Risk of failure
+- Probability of success
 
 We are specifically employing this Monte Carlo simulation to explore the effects of different policy interventions on antibiotics R&D.
 
@@ -77,32 +77,32 @@ a2,    0.3,            0
 Phases must be supplied in CSV format (`PHASES` above), with headers, as per the spec below. The column order must not be changed.
 
 ```csv
-time,       cost,       revenue,    risk
+time,       cost,       revenue,    prob
 DIST(NUM),  DIST(NUM),  DIST(NUM),  DIST(FRAC)
 ```
 
 The following is a valid example of a `PHASES` csv file:
 
 ```csv
-time,   cost,  revenue,  risk
+time,   cost,  revenue,  prob
 2.2-5,  2,     0,        0.5
 8,      2.5-8, 0,        0.9
-10,     10.5,  100,      0.4-0.3
+10,     10.5,  100,      0.3-0.4
 ```
 
-The phases csv file *must* contain at least two entries, since the last entry is assumed to be the market. As opposed to all other phases, the market will be converted from a single phase spanning multiple years into multiple phases each spanning a single year. Revenues and costs are assumed to linearly increase over the time period, while risk of failure is assumed to remain constant.
+The phases csv file *must* contain at least two entries, since the last entry is assumed to be the market. As opposed to all other phases, the market will be converted from a single phase spanning multiple years into multiple phases each spanning a single year. Revenues and costs are assumed to linearly increase over the time period, while probability of success is assumed to remain constant.
 
 To exemplify, the following market...
 
 ```csv
-time,   cost,  revenue,  risk
+time,   cost,  revenue,  prob
 3       100    1000      0.5
 ```
 
 ...would be converted into:
 
 ```csv
-time,  cost,  revenue,  risk
+time,  cost,  revenue,  prob
 1,     10,    100,      0.8408964152537145
 1,     20,    200,      0.8408964152537145
 1,     30,    300,      0.8408964152537145
