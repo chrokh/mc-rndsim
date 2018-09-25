@@ -402,6 +402,9 @@ class Effect
     when 'prob'
       x = phase.prob.send(@operator, @operand)
       Phase.new(phase.time, phase.cost, phase.cash, x)
+    when 'risk'
+      risk = (1 - phase.prob).send(@operator, @operand)
+      Phase.new(phase.time, phase.cost, phase.cash, (1-risk))
     else
       raise "Unknown property (#{@property}) in intervention effect."
     end

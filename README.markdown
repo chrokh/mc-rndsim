@@ -122,7 +122,7 @@ STRING,  DIST(INT),  PROP,      OPERATOR,  DIST(NUM)
 Where, beyond the previously defined data types, the following definitions also hold:
 
 ```
-PROP     = "REVENUE" | "COST" | "TIME" | "RISK"
+PROP     = "REVENUE" | "COST" | "TIME" | "PROB" | "RISK"
 OPERATOR = "+" | "-" | "*" | "/"
 ```
 
@@ -131,6 +131,10 @@ The `name` parameter will be used in the generated output when the simulation is
 If the same `name` is used on multiple rows then these effects will all be applied (in the order that they are listed) whenever an intervention is applied. The interventions input csv file can therefore be thought of as listing interventions by listing intervention effects.
 
 If the interventions input file is empty then the baseline world (i.e. whatever is described in the phases and config inputs) will still be explored.
+
+Tip: Remember that doubling probability of success (`PROB` / PoS) is not the same as halving risk of failure (`RISK` / RoF).
+`5 * RISK / 2  !=  2 * PROB`.
+Therefore I suggest always expressing fractional reductions in `PROB` or `RISK` rather than increases to avoid accidentally transforming PoS to something outside of `(0,1]`. Choose whichever of the two you can express as a fractional decrease.
 
 The following is a valid example of an `INTERVENTIONS` csv file:
 

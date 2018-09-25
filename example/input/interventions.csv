@@ -19,8 +19,8 @@ grants,   3,      cost,      *,         0.2-0.8
 grants,   4,      cost,      *,         0.2-0.8
 ENABLE,   0,      cost,      *,         0
 ENABLE,   1,      cost,      *,         0
-ENABLE,   0,      prob,      *,         0.7-1
-ENABLE,   1,      prob,      *,         0.7-1
+ENABLE,   0,      risk,      *,         0.7-1
+ENABLE,   1,      risk,      *,         0.7-1
 ENABLE,   0,      time,      *,         0.7-1
 ENABLE,   1,      time,      *,         0.7-1
 GARDP,    1,      cost,      *,         0.5
@@ -30,5 +30,5 @@ GARDP,    4,      cost,      *,         0
 GARDP,    6,      revenue,   *,         0.5
 REGsimp,  3,      cost,      *,         0.5
 REGsimp,  3,      time,      *,         0.5
-REGsimp,  3,      prob,      *,         0.5
+REGsimp,  3,      risk,      *,         0.5
 
