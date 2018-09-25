@@ -5,12 +5,12 @@ tmp <- subset(df, df$group != 'prize')
 tmp$group <- factor(tmp$group)
 
 # Reorder groups based on their relative enpv
-groups0 <- reorder(merged$group, merged$enpv0, median)
-groups1 <- reorder(merged$group, merged$enpv1, median)
-groups2 <- reorder(merged$group, merged$enpv2, median)
-groups3 <- reorder(merged$group, merged$enpv3, median)
-groups4 <- reorder(merged$group, merged$enpv4, median)
-groups5 <- reorder(merged$group, merged$enpv5, median)
+groups0 <- reorder(tmp$group, tmp$enpv0, median)
+groups1 <- reorder(tmp$group, tmp$enpv1, median)
+groups2 <- reorder(tmp$group, tmp$enpv2, median)
+groups3 <- reorder(tmp$group, tmp$enpv3, median)
+groups4 <- reorder(tmp$group, tmp$enpv4, median)
+groups5 <- reorder(tmp$group, tmp$enpv5, median)
 
 # Plot ENPV
 boxplot(tmp$enpv0 ~ groups0, col='lightgrey', outline=FALSE, las=2, ylab='PC ENPV')
