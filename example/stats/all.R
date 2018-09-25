@@ -1,3 +1,11 @@
+# ====== DEPENDENCIES ======
+#
+# install.packages('gplots')
+#
+# ==========================
+
+library(gplots)
+
 pdf('plots/summary.pdf', 9, 8)
 
 print('stats/cashflow.R')
@@ -21,5 +29,9 @@ source('stats/notogo.R')
 print('stats/interventions-enpv.R')
 source('stats/interventions-enpv.R')
 
+print('stats/go-ratio.R')
+tmp <- source('stats/go-ratio.R')$value
+write.table(tmp, 'plots/summary.csv', sep=',', row.names=FALSE)
+textplot(tmp)
 
 dev.off()
