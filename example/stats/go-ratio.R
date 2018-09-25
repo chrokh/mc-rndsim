@@ -41,10 +41,8 @@ counted <- ddply(merged, .(group), summarize,
                  goratediv   = gorate / xgorate,
                  spend       = sum(spend),
                  ex_spend    = sum(ex_spend),
-                 goratediv_per_spend = gorate / spend,
-                 goratediv_per_ex_spend = gorate / ex_spend * 1000000
+                 goratediv_per_spend = goratediv / spend,
+                 goratediv_per_ex_spend = goratediv / ex_spend
 )
 
 counted
-
-
