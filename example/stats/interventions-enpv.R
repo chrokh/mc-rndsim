@@ -4,6 +4,10 @@ df <- read.csv("./output/example.csv")
 tmp <- subset(df, df$group != 'prize')
 tmp$group <- factor(tmp$group)
 
+
+
+# JUST ENPV
+
 # Reorder groups based on their relative enpv
 groups0 <- reorder(tmp$group, tmp$enpv0, median)
 groups1 <- reorder(tmp$group, tmp$enpv1, median)
@@ -25,6 +29,10 @@ boxplot(tmp$enpv4 ~ groups4, col='lightgrey', outline=FALSE, las=2, ylab='P4 ENP
 mtext(side=3, line=0.5, text='(no outliers)')
 boxplot(tmp$enpv5 ~ groups5, col='lightgrey', outline=FALSE, las=2, ylab='Market ENPV')
 mtext(side=3, line=0.5, text='(no outliers)')
+
+
+
+# ABSOLUTE IMPROVEMENT
 
 # Create base subset and rename columns to prepare for merge
 base <- subset(tmp, tmp$group == 'base')
@@ -63,3 +71,38 @@ boxplot(merged$enpv4diff ~ diffgroups4, col='lightgrey', outline=FALSE, las=2, y
 mtext(side=3, line=0.5, text='(no outliers)')
 boxplot(merged$enpv5diff ~ diffgroups5, col='lightgrey', outline=FALSE, las=2, ylab='Market ENPV improvement')
 mtext(side=3, line=0.5, text='(no outliers)')
+
+
+
+# RELATIVE IMPROVEMENT
+
+# Compute relative improvements (ratios) (we're adding the abs-min-value to translate all numbers to >= 0)
+merged$enpv0ratio <- (merged$enpv0 + abs(min(merged$enpv0))) / (merged$xenpv0 + abs(min(merged$enpv0)))
+merged$enpv1ratio <- (merged$enpv1 + abs(min(merged$enpv1))) / (merged$xenpv1 + abs(min(merged$enpv1)))
+merged$enpv2ratio <- (merged$enpv2 + abs(min(merged$enpv2))) / (merged$xenpv2 + abs(min(merged$enpv2)))
+merged$enpv3ratio <- (merged$enpv3 + abs(min(merged$enpv3))) / (merged$xenpv3 + abs(min(merged$enpv3)))
+merged$enpv4ratio <- (merged$enpv4 + abs(min(merged$enpv4))) / (merged$xenpv4 + abs(min(merged$enpv4)))
+merged$enpv5ratio <- (merged$enpv5 + abs(min(merged$enpv5))) / (merged$xenpv5 + abs(min(merged$enpv5)))
+
+# Reorder groups based on their relative enpv ratio
+groups0 <- reorder(merged$group, merged$enpv0ratio, median)
+groups1 <- reorder(merged$group, merged$enpv1ratio, median)
+groups2 <- reorder(merged$group, merged$enpv2ratio, median)
+groups3 <- reorder(merged$group, merged$enpv3ratio, median)
+groups4 <- reorder(merged$group, merged$enpv4ratio, median)
+groups5 <- reorder(merged$group, merged$enpv5ratio, median)
+
+# Plot ENPV ratios ordered by relative effect
+boxplot(merged$enpv0ratio ~ groups0, col='lightgrey', outline=FALSE, las=2, ylab='PC ENPV ratio compared to baseline')
+mtext(side=3, line=0.5, text='(no outliers)')
+boxplot(merged$enpv1ratio ~ groups1, col='lightgrey', outline=FALSE, las=2, ylab='P1 ENPV ratio compared to baseline')
+mtext(side=3, line=0.5, text='(no outliers)')
+boxplot(merged$enpv2ratio ~ groups2, col='lightgrey', outline=FALSE, las=2, ylab='P2 ENPV ratio compared to baseline')
+mtext(side=3, line=0.5, text='(no outliers)')
+boxplot(merged$enpv3ratio ~ groups3, col='lightgrey', outline=FALSE, las=2, ylab='P3 ENPV ratio compared to baseline')
+mtext(side=3, line=0.5, text='(no outliers)')
+boxplot(merged$enpv4ratio ~ groups4, col='lightgrey', outline=FALSE, las=2, ylab='P4 ENPV ratio compared to baseline')
+mtext(side=3, line=0.5, text='(no outliers)')
+boxplot(merged$enpv5ratio ~ groups5, col='lightgrey', outline=FALSE, las=2, ylab='Market ENPV ratio compared to baseline')
+mtext(side=3, line=0.5, text='(no outliers)')
+
