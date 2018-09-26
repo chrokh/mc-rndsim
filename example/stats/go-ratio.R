@@ -21,7 +21,7 @@ tmp$EXcashflow5 <- (tmp$revenue5 - tmp$cost5) * tmp$prob0 * tmp$prob1 * tmp$prob
 tmp$EXcashflow  <- tmp$EXcashflow0+tmp$EXcashflow1+tmp$EXcashflow2+tmp$EXcashflow3+tmp$EXcashflow4+tmp$EXcashflow5
 
 # Sum up PoS
-tmp$prob <- tmp$prob0+tmp$prob1+tmp$prob2+tmp$prob3+tmp$prob4+tmp$prob5 # NOTE: Not including market
+tmp$prob <- tmp$prob0*tmp$prob1*tmp$prob2*tmp$prob3*tmp$prob4*tmp$prob5 # NOTE: Not including market
 
 # Compute expected market count
 tmp$EXmarket_count <- ifelse(tmp$conseq_decision5 == 'true', tmp$prob, 0)
