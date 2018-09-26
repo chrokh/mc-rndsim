@@ -7,8 +7,8 @@ tmp <- subset(df, df$group != 'prize')
 tmp$group <- factor(tmp$group)
 
 # Sum up cashflows
-tmp$revenue  <- tmp$revenue0+tmp$revenue1+tmp$revenue2+tmp$revenue3+tmp$revenue4+tmp$revenue5+tmp$revenue6+tmp$revenue7+tmp$revenue8+tmp$revenue9+tmp$revenue10+tmp$revenue11+tmp$revenue12+tmp$revenue13+tmp$revenue14+tmp$revenue15
-tmp$cost     <- tmp$cost0+tmp$cost1+tmp$cost2+tmp$cost3+tmp$cost4+tmp$cost5+tmp$cost6+tmp$cost7+tmp$cost8+tmp$cost9+tmp$cost10+tmp$cost11+tmp$cost12+tmp$cost13+tmp$cost14+tmp$cost15
+tmp$revenue  <- tmp$revenue0+tmp$revenue1+tmp$revenue2+tmp$revenue3+tmp$revenue4+tmp$revenue5 # NOTE: Not including market
+tmp$cost     <- tmp$cost0+tmp$cost1+tmp$cost2+tmp$cost3+tmp$cost4+tmp$cost5 # NOTE: Not including market
 tmp$cashflow <- tmp$revenue - tmp$cost
 
 # Compute expected (probabilistic) cashflows
@@ -21,7 +21,7 @@ tmp$EXcashflow5 <- (tmp$revenue5 - tmp$cost5) * tmp$prob0 * tmp$prob1 * tmp$prob
 tmp$EXcashflow  <- tmp$EXcashflow0+tmp$EXcashflow1+tmp$EXcashflow2+tmp$EXcashflow3+tmp$EXcashflow4+tmp$EXcashflow5
 
 # Sum up PoS
-tmp$prob <- tmp$prob0+tmp$prob1+tmp$prob2+tmp$prob3+tmp$prob4+tmp$prob5
+tmp$prob <- tmp$prob0+tmp$prob1+tmp$prob2+tmp$prob3+tmp$prob4+tmp$prob5 # NOTE: Not including market
 
 # Compute expected market count
 tmp$EXmarket_count <- ifelse(tmp$conseq_decision5 == 'true', tmp$prob, 0)
