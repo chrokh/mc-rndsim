@@ -125,14 +125,17 @@ class World
     )
   end
   def apply effect
-    phases = @phases.map.with_index do |e,i|
-      if i == effect.phase.to_i
-        effect.apply e
-      else
-        e
+    n = effect.phase.to_i
+    if n == @phases.length
+      World.new(@id, effect.group, @phases, effect.apply(@market, Market), @agent)
+    elsif n >= 0 && n < @phases.length
+      phases = @phases.map.with_index do |e,i|
+        if i == n then effect.apply(e, Phase) else e end
       end
+      World.new(@id, effect.group, phases, @market, @agent)
+    else
+      raise "Attempting to apply intervention effect (#{effect.group}) to unknown phase (#{n})"
     end
-    World.new(@id, effect.group, phases, @market, @agent)
   end
 end
 
@@ -386,24 +389,24 @@ class Effect
     @phase = target_phase
     @property = property
   end
-  def apply phase
+  def apply phase, klass
     case @property
     when 'time'
       x = phase.time.send(@operator, @operand)
-      Phase.new(x, phase.cost, phase.cash, phase.prob)
+      klass.new(x, phase.cost, phase.cash, phase.prob)
     when 'cost'
       x = phase.cost.send(@operator, @operand)
       x = x < 0 ? 0 : x
-      Phase.new(phase.time, x, phase.cash, phase.prob)
+      klass.new(phase.time, x, phase.cash, phase.prob)
     when 'revenue'
       x = phase.cash.send(@operator, @operand)
-      Phase.new(phase.time, phase.cost, x, phase.prob)
+      klass.new(phase.time, phase.cost, x, phase.prob)
     when 'prob'
       x = phase.prob.send(@operator, @operand)
-      Phase.new(phase.time, phase.cost, phase.cash, x)
+      klass.new(phase.time, phase.cost, phase.cash, x)
     when 'risk'
       risk = (1 - phase.prob).send(@operator, @operand)
-      Phase.new(phase.time, phase.cost, phase.cash, (1-risk))
+      klass.new(phase.time, phase.cost, phase.cash, (1-risk))
     else
       raise "Unknown property (#{@property}) in intervention effect."
     end
