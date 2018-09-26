@@ -48,17 +48,17 @@ counted <- ddply(merged, .(group), summarize,
                  tot_spend    = sum(spend),
                  tot_EXspend  = sum(EXspend),
                  
-                 # per entry
+                 # go-rate
                  gorate           = gos / n,
                  xgorate          = xgos / n,
-                 avg_spend        = tot_spend / n,
-                 avg_EXspend      = tot_EXspend / n,
                  gorateimpr       = gorate / xgorate,
                  spend_per_impr   = tot_spend / gorateimpr,
-                 EXspend_p_impr   = tot_EXspend / gorateimpr,
+                 EXspend_per_impr = tot_EXspend / gorateimpr,
                  
-                 # per exits
-                 spend_per_market   = tot_spend / m,
-                 EXspend_per_market = tot_EXspend / m
+                 # per entry / exit
+                 spend_per_entry    = tot_spend / n,
+                 spend_per_EXexit   = tot_spend / m,
+                 EXspend_per_entry  = tot_EXspend / n,
+                 EXspend_per_EXexit = tot_EXspend / m
 )
 counted
