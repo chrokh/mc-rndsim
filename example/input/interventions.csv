@@ -1,4 +1,9 @@
 name,     phase,  property,  operator,  operand
+public,   0,      cost,      *,         0
+public,   1,      cost,      *,         0
+public,   2,      cost,      *,         0
+public,   3,      cost,      *,         0
+public,   4,      cost,      *,         0
 prize,    0-5,    revenue,   +,         0-750
 pdMER,    5,      revenue,   +,         750
 fdMER,    6,      revenue,   *,         0
