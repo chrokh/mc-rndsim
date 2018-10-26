@@ -2,3 +2,5 @@
 output.csv
 output
 plots
+.RDataTmp
+.Rhistory
