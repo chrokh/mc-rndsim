@@ -149,35 +149,23 @@ free,    2,      cost,      *,         0
 In natural language the above example describes two interventions. One named `prize` and the other `free`. The former intervention (`prize`) consists of a single effect, while the latter has three effects. The former adds anything between 0 and 2000 to the revenue property of any of the phases between 0 and 5. Which phase it will be and how much it will add depends on what samples are drawn from the distributions in any given world. The latter intervention (`free`) reduces the cost of the first 3 phases (i.e. number 0, 2 and 1) down to zero, effectively making them free. The effects are applied in the order in which they appear, but in this particular example, the order of application does not affect the end result.
 
 
+# Examples
 
-
-
-
-
-# Example
-
-A set of example input files can be found under `example/input`. Navigate to the folder `example` and run the main script while passing all the input files as per below. Explore each of the input files to understand how input files should be structured.
+A set of example input files can be found under `examples/[EX]/input`. Navigate to the folder `examples/[EX]` where `[EX]` is replaced by one of the example, and run the main script while passing all the input files as per the example below. Explore each of the input files to understand how input files should be structured.
 
 ```bash
-cd example
-ruby ../main.rb 10000 input/config.yaml input/phases.csv input/interventions.csv output/example.csv 1
+cd examples/multiple
+ruby ../../main.rb 10000 input/config.yaml input/phases.csv input/interventions.csv output/example.csv 1
 ```
 
-In the example folder you will in `example/stats` find a bunch of R script that produce a number of different plots. The R scripts assume that your current working directory (`wd`) is the `example` folder. When using the `rscript` command in a terminal your `wd` is the folder from which you execute the scripts.
+In each example folder you will in `examples/[EX]/stats` find a bunch of R script that produce a number of different plots. The R scripts assume that your current working directory (`wd`) is the `examples/[EX]` folder. When using the `rscript` command in a terminal your `wd` is the folder from which you execute the scripts.
 
 ```bash
-cd example
+cd examples/multiple
 rscript stats/cumulative-cashflow-01.R
 ```
 
 If you're using RStudio you can manually set the working directory using the `setwd` command, or remove the lines from the example R scripts that read the output files and manually read them yourself.
-
-For convenience you can run the script `all.R`, which will source all scripts in `example/stats` and write all plots to a single pdf file.
-
-```bash
-cd example
-rscript all.R
-```
 
 
 # License
