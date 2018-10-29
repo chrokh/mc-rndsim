@@ -151,15 +151,6 @@ merged$epv_spend4 <- -merged$capitalized_spend4 * merged$prob3
 merged$epv_spend5 <- -merged$capitalized_spend5 * merged$prob4
 merged$enpv_spend <- merged$epv_spend0 + merged$epv_spend1 + merged$epv_spend2 + merged$epv_spend3 + merged$epv_spend4 + merged$epv_spend5
 
-# Compute go-corrected enpv spend (Is 0 really a good assumption here?)
-# merged$go_corrected_epv_spend0 <- ifelse(merged$conseq_decision0=='false', 0, merged$epv_spend0)
-# merged$go_corrected_epv_spend1 <- ifelse(merged$conseq_decision1=='false', 0, merged$epv_spend1)
-# merged$go_corrected_epv_spend2 <- ifelse(merged$conseq_decision2=='false', 0, merged$epv_spend2)
-# merged$go_corrected_epv_spend3 <- ifelse(merged$conseq_decision3=='false', 0, merged$epv_spend3)
-# merged$go_corrected_epv_spend4 <- ifelse(merged$conseq_decision4=='false', 0, merged$epv_spend4)
-# merged$go_corrected_epv_spend5 <- ifelse(merged$conseq_decision5=='false', 0, merged$epv_spend5)
-# merged$go_corrected_enpv_spend <- merged$go_corrected_epv_spend0 + merged$go_corrected_epv_spend1 + merged$go_corrected_epv_spend2 + merged$go_corrected_epv_spend3 + merged$go_corrected_epv_spend4 + merged$go_corrected_epv_spend5
-
 # Compute enpv improvements
 merged$enpv0diff  <- merged$ienpv0 - merged$enpv0
 bottom <- abs(min(merged$enpv0, merged$ienpv0)) + 1
@@ -192,9 +183,9 @@ byGroupAndSpendBin <- ddply(
   enpv_spend_max  = max(enpv_spend),
   enpv_spend_min  = min(enpv_spend),
   enpv_spend_mean = mean(enpv_spend),
-  go_corrected_enpv_spend_max  = max(go_corrected_enpv_spend),
-  go_corrected_enpv_spend_min  = min(go_corrected_enpv_spend),
-  go_corrected_enpv_spend_mean = mean(go_corrected_enpv_spend),
+  go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
+  go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
+  go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true']),
   public_enpv0_max  = max(public_enpv0),
   public_enpv0_min  = min(public_enpv0),
   public_enpv0_mean = mean(public_enpv0),
@@ -221,9 +212,9 @@ byGroupAndSpendLogBin <- ddply(
   public_enpv0_max  = max(public_enpv0),
   public_enpv0_min  = min(public_enpv0),
   public_enpv0_mean = mean(public_enpv0),
-  public_go_corrected_enpv0_max  = max(public_go_corrected_enpv0),
-  public_go_corrected_enpv0_min  = min(public_go_corrected_enpv0),
-  public_go_corrected_enpv0_mean = mean(public_enpv0)
+  go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
+  go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
+  go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
 )
 pcGoByGroupAndSpendLogBin <- ddply(
   merged,
@@ -244,9 +235,9 @@ pcGoByGroupAndSpendLogBin <- ddply(
   public_enpv0_max  = max(public_enpv0),
   public_enpv0_min  = min(public_enpv0),
   public_enpv0_mean = mean(public_enpv0),
-  public_go_corrected_enpv0_max  = max(public_go_corrected_enpv0),
-  public_go_corrected_enpv0_min  = min(public_go_corrected_enpv0),
-  public_go_corrected_enpv0_mean = mean(public_enpv0)
+  go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
+  go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
+  go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
 )
 
 byGroupAndCapitalizedSpendBin <- ddply(
