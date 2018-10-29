@@ -79,38 +79,13 @@ tmp$timeto3 <- tmp$time0 + tmp$time1 + tmp$time2
 tmp$timeto4 <- tmp$time0 + tmp$time1 + tmp$time2 + tmp$time3
 tmp$timeto5 <- tmp$time0 + tmp$time1 + tmp$time2 + tmp$time3 + tmp$time4
 
-# Sum up capitalized development costs... etc
-tmp$capitalized_cost0 <- tmp$cost0/((1+DISCOUNT_RATE)^tmp$timeto0)
-tmp$capitalized_cost1 <- tmp$cost1/((1+DISCOUNT_RATE)^tmp$timeto1)
-tmp$capitalized_cost2 <- tmp$cost2/((1+DISCOUNT_RATE)^tmp$timeto2)
-tmp$capitalized_cost3 <- tmp$cost3/((1+DISCOUNT_RATE)^tmp$timeto3)
-tmp$capitalized_cost4 <- tmp$cost4/((1+DISCOUNT_RATE)^tmp$timeto4)
-tmp$capitalized_cost5 <- tmp$cost5/((1+DISCOUNT_RATE)^tmp$timeto5)
-tmp$capitalized_cost  <- tmp$capitalized_cost0 + tmp$capitalized_cost1 + tmp$capitalized_cost2 + tmp$capitalized_cost3 + tmp$capitalized_cost4 + tmp$capitalized_cost5
-
-tmp$capitalized_revenue0 <- tmp$revenue0/((1+DISCOUNT_RATE)^tmp$timeto0)
-tmp$capitalized_revenue1 <- tmp$revenue1/((1+DISCOUNT_RATE)^tmp$timeto1)
-tmp$capitalized_revenue2 <- tmp$revenue2/((1+DISCOUNT_RATE)^tmp$timeto2)
-tmp$capitalized_revenue3 <- tmp$revenue3/((1+DISCOUNT_RATE)^tmp$timeto3)
-tmp$capitalized_revenue4 <- tmp$revenue4/((1+DISCOUNT_RATE)^tmp$timeto4)
-tmp$capitalized_revenue5 <- tmp$revenue5/((1+DISCOUNT_RATE)^tmp$timeto5)
-tmp$capitalized_revenue  <- tmp$capitalized_revenue0 + tmp$capitalized_revenue1 + tmp$capitalized_revenue2 + tmp$capitalized_revenue3 + tmp$capitalized_revenue4 + tmp$capitalized_revenue5
-
-tmp$capitalized_cashflow0 <- tmp$capitalized_revenue0 - tmp$capitalized_cost0
-tmp$capitalized_cashflow1 <- tmp$capitalized_revenue1 - tmp$capitalized_cost1
-tmp$capitalized_cashflow2 <- tmp$capitalized_revenue2 - tmp$capitalized_cost2
-tmp$capitalized_cashflow3 <- tmp$capitalized_revenue3 - tmp$capitalized_cost3
-tmp$capitalized_cashflow4 <- tmp$capitalized_revenue4 - tmp$capitalized_cost4
-tmp$capitalized_cashflow5 <- tmp$capitalized_revenue5 - tmp$capitalized_cost5
-tmp$capitalized_cashflow  <- tmp$capitalized_revenue - tmp$capitalized_cost
-
 # Compute public ENPV (IS PROB HANDLED CORRECTLY HERE?)
-tmp$public_epv0 <- tmp$capitalized_cashflow0 * 1
-tmp$public_epv1 <- tmp$capitalized_cashflow1 * tmp$prob0
-tmp$public_epv2 <- tmp$capitalized_cashflow2 * tmp$prob1
-tmp$public_epv3 <- tmp$capitalized_cashflow3 * tmp$prob2
-tmp$public_epv4 <- tmp$capitalized_cashflow4 * tmp$prob3
-tmp$public_epv5 <- tmp$capitalized_cashflow5 * tmp$prob4
+tmp$public_epv0 <- (tmp$revenue0-tmp$cost0)/((1+DISCOUNT_RATE)^tmp$timeto0) * 1
+tmp$public_epv1 <- (tmp$revenue1-tmp$cost1)/((1+DISCOUNT_RATE)^tmp$timeto1) * tmp$prob0
+tmp$public_epv2 <- (tmp$revenue2-tmp$cost2)/((1+DISCOUNT_RATE)^tmp$timeto2) * tmp$prob1
+tmp$public_epv3 <- (tmp$revenue3-tmp$cost3)/((1+DISCOUNT_RATE)^tmp$timeto3) * tmp$prob2
+tmp$public_epv4 <- (tmp$revenue4-tmp$cost4)/((1+DISCOUNT_RATE)^tmp$timeto4) * tmp$prob3
+tmp$public_epv5 <- (tmp$revenue5-tmp$cost5)/((1+DISCOUNT_RATE)^tmp$timeto5) * tmp$prob4
 tmp$public_enpv0 <- tmp$public_epv0 + tmp$public_epv1 + tmp$public_epv2 + tmp$public_epv3 + tmp$public_epv4 + tmp$public_epv5
 
 # Split on intervention/base and join horizontally to allow comparisons
@@ -133,22 +108,13 @@ merged$spend4 <- merged$icashflow4 - merged$cashflow4
 merged$spend5 <- merged$icashflow5 - merged$cashflow5
 merged$spend  <- merged$icashflow - merged$cashflow
 
-# Compute capitalized intervention spend
-merged$capitalized_spend0 <- merged$icapitalized_cashflow0 - merged$capitalized_cashflow0
-merged$capitalized_spend1 <- merged$icapitalized_cashflow1 - merged$capitalized_cashflow1
-merged$capitalized_spend2 <- merged$icapitalized_cashflow2 - merged$capitalized_cashflow2
-merged$capitalized_spend3 <- merged$icapitalized_cashflow3 - merged$capitalized_cashflow3
-merged$capitalized_spend4 <- merged$icapitalized_cashflow4 - merged$capitalized_cashflow4
-merged$capitalized_spend5 <- merged$icapitalized_cashflow5 - merged$capitalized_cashflow5
-merged$capitalized_spend  <- merged$icapitalized_cashflow - merged$capitalized_cashflow
-
 # Compute enpv spend (NOT SURE IF PROB HERE IS CORRECT. I could not figure out R0/Ri properly)
-merged$epv_spend0 <- -merged$capitalized_spend0 * 1
-merged$epv_spend1 <- -merged$capitalized_spend1 * merged$prob0
-merged$epv_spend2 <- -merged$capitalized_spend2 * merged$prob1
-merged$epv_spend3 <- -merged$capitalized_spend3 * merged$prob2
-merged$epv_spend4 <- -merged$capitalized_spend4 * merged$prob3
-merged$epv_spend5 <- -merged$capitalized_spend5 * merged$prob4
+merged$epv_spend0 <- -(merged$spend0 / ((1+DISCOUNT_RATE)^merged$itimeto0)) * 1
+merged$epv_spend1 <- -(merged$spend1 / ((1+DISCOUNT_RATE)^merged$itimeto1)) * merged$iprob0
+merged$epv_spend2 <- -(merged$spend2 / ((1+DISCOUNT_RATE)^merged$itimeto2)) * merged$iprob1
+merged$epv_spend3 <- -(merged$spend3 / ((1+DISCOUNT_RATE)^merged$itimeto3)) * merged$iprob2
+merged$epv_spend4 <- -(merged$spend4 / ((1+DISCOUNT_RATE)^merged$itimeto4)) * merged$iprob3
+merged$epv_spend5 <- -(merged$spend5 / ((1+DISCOUNT_RATE)^merged$itimeto5)) * merged$iprob4
 merged$enpv_spend <- merged$epv_spend0 + merged$epv_spend1 + merged$epv_spend2 + merged$epv_spend3 + merged$epv_spend4 + merged$epv_spend5
 
 # Compute enpv improvements
@@ -160,7 +126,6 @@ merged$enpv0ratio <- (merged$ienpv0 + bottom) / (merged$enpv0 + bottom)
 merged$spend_bin             <- mround(merged$spend, 10)
 merged$spend_5bin            <- mround(merged$spend, 5)
 merged$spend_logbin          <- log_bin(merged$spend, 2)
-merged$capitalized_spend_bin <- mround(merged$capitalized_spend, 10)
 merged$enpv_spend_bin        <- bin_into(merged$enpv_spend, 200)
 merged$enpv0diff_bin         <- bin_into(merged$enpv0diff, 500)
 merged$enpv0ratio_bin        <- bin_into(merged$enpv0ratio, 500)
@@ -239,24 +204,6 @@ pcGoByGroupAndSpendLogBin <- ddply(
   go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
   go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
 )
-
-byGroupAndCapitalizedSpendBin <- ddply(
-  merged,
-  .(igroup, capitalized_spend_bin),
-  summarize,
-  count     = length(prob),
-  go_count  = sum(go),
-  igo_count = sum(igo),
-  go_ratio  = go_count / count * 100,
-  igo_ratio = igo_count / count * 100,
-  go_ratio_improvement = igo_ratio / go_ratio,
-  enpv_spend_max  = max(enpv_spend),
-  enpv_spend_min  = min(enpv_spend),
-  enpv_spend_mean = mean(enpv_spend),
-  public_enpv0_max  = max(public_enpv0),
-  public_enpv0_min  = min(public_enpv0),
-  public_enpv0_mean = mean(public_enpv0)
-)
 byGroupAndEnpv0DiffBin <- ddply(
   merged,
   .(igroup, enpv0diff_bin),
@@ -319,31 +266,6 @@ for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
   lines(sub$spend_logbin, sub$igo_ratio, col=sub$igroup)
 }
-
-
-
-
-#
-# CAPITALIZED
-#
-
-pf <- byGroupAndCapitalizedSpendBin
-plot(
-  pf$capitalized_spend_bin,
-  pf$igo_ratio,
-  col = as.factor(pf$igroup),
-  log = 'x',
-  las = 1,
-  pch = 16,
-  xaxt = 'n',
-  xlab = 'Capitalized public intervention expenditure (binned)',
-  ylab = 'Go-decisions (%)'
-)
-abline(v=c(min(tmp$capitalized_cost), mean(tmp$capitalized_cost), max(tmp$capitalized_cost)), col='black', lty=c(3,2,3), lwd=1.5)
-axis(1,log_tick_marks(1,5000), las=2)
-mtext(side = 1, line = 4, '(Dashed lines represent min/mean/max capitalized development cost)')
-legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
-
 
 
 
