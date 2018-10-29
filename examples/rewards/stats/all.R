@@ -3,8 +3,8 @@ library(plyr)
 # =============== Options ==================
 options(scipen=999)                     # Turn off scientific notation
 DISCOUNT_RATE <- 0.04                   # State discount rate assumption
-#df <- read.csv("./output/example.csv")  # Input data
-write_to_file <- TRUE                  # Write to file?
+df <- read.csv("./output/example.csv")  # Input data
+write_to_file <- TRUE                   # Write to file?
 # ==========================================
 
 
