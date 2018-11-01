@@ -155,84 +155,48 @@ merged$go  <- merged$enpv0  >= merged$threshold
 merged$igo <- merged$ienpv0 >= merged$ithreshold
 
 # ======== Aggregate ===============
-byGroupAndSpendBin <- ddply(
-  merged,
-  .(igroup, spend_bin),
-  summarize,
-  count     = length(prob),
-  go_count  = sum(go),
-  igo_count = sum(igo),
-  go_ratio  = go_count / count * 100,
-  igo_ratio = igo_count / count * 100,
-  go_ratio_improvement = igo_ratio / go_ratio,
-  enpv_spend_max  = max(enpv_spend),
-  enpv_spend_min  = min(enpv_spend),
-  enpv_spend_mean = mean(enpv_spend),
-  go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true']),
-  public_enpv0_max  = max(public_enpv0),
-  public_enpv0_min  = min(public_enpv0),
-  public_enpv0_mean = mean(public_enpv0),
-  ineff_public_enpv0_max  = max(ineff_public_enpv0),
-  ineff_public_enpv0_min  = min(ineff_public_enpv0),
-  ineff_public_enpv0_mean = mean(ineff_public_enpv0),
-  enpv0diff_mean  = mean(enpv0diff),
-  enpv0diff_min   = min(enpv0diff),
-  enpv0diff_max   = max(enpv0diff),
-  enpv0ratio_mean = mean(enpv0ratio),
-  enpv0ratio_min  = min(enpv0ratio),
-  enpv0ratio_max  = max(enpv0ratio)
-)
-byGroupAndSpendLogBin <- ddply(
-  merged,
-  .(igroup, spend_logbin),
-  summarize,
-  count     = length(prob),
-  go_count  = sum(go),
-  igo_count = sum(igo),
-  go_ratio  = go_count / count * 100,
-  igo_ratio = igo_count / count * 100,
-  go_ratio_improvement = igo_ratio / go_ratio,
-  enpv_spend_max  = max(enpv_spend),
-  enpv_spend_min  = min(enpv_spend),
-  enpv_spend_mean = mean(enpv_spend),
-  public_enpv0_max  = max(public_enpv0),
-  public_enpv0_min  = min(public_enpv0),
-  public_enpv0_mean = mean(public_enpv0),
-  ineff_public_enpv0_max  = max(ineff_public_enpv0),
-  ineff_public_enpv0_min  = min(ineff_public_enpv0),
-  ineff_public_enpv0_mean = mean(ineff_public_enpv0),
-  go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
-)
-pcGoByGroupAndSpendLogBin <- ddply(
-  merged,
-  .(igroup, spend_logbin),
-  summarize,
-  count     = length(prob),
-  go_count  = sum(go),
-  igo_count = sum(igo),
-  go_ratio  = go_count / count * 100,
-  igo_ratio = igo_count / count * 100,
-  go_ratio_improvement = igo_ratio / go_ratio,
-  enpv_spend_max  = max(enpv_spend),
-  enpv_spend_min  = min(enpv_spend),
-  enpv_spend_mean = mean(enpv_spend),
-  go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true']),
-  public_enpv0_max  = max(public_enpv0),
-  public_enpv0_min  = min(public_enpv0),
-  public_enpv0_mean = mean(public_enpv0),
-  ineff_public_enpv0_max  = max(ineff_public_enpv0),
-  ineff_public_enpv0_min  = min(ineff_public_enpv0),
-  ineff_public_enpv0_mean = mean(ineff_public_enpv0),
-  go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
-  go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
-)
+byGroupAnd <- function(df, spend_key) {
+  ddply(
+    merged,
+    c('igroup', spend_key), #.(igroup, spend_logbin),
+    summarize,
+
+    count     = length(prob),
+    go_count  = sum(go),
+    igo_count = sum(igo),
+    go_ratio  = go_count / count * 100,
+    igo_ratio = igo_count / count * 100,
+    go_ratio_improvement = igo_ratio / go_ratio,
+
+    enpv_spend_max  = max(enpv_spend),
+    enpv_spend_min  = min(enpv_spend),
+    enpv_spend_mean = mean(enpv_spend),
+
+    public_enpv0_max  = max(public_enpv0),
+    public_enpv0_min  = min(public_enpv0),
+    public_enpv0_mean = mean(public_enpv0),
+
+    ineff_public_enpv0_max  = max(ineff_public_enpv0),
+    ineff_public_enpv0_min  = min(ineff_public_enpv0),
+    ineff_public_enpv0_mean = mean(ineff_public_enpv0),
+
+    enpv0diff_mean  = mean(enpv0diff),
+    enpv0diff_min   = min(enpv0diff),
+    enpv0diff_max   = max(enpv0diff),
+
+    enpv0ratio_mean = mean(enpv0ratio),
+    enpv0ratio_min  = min(enpv0ratio),
+    enpv0ratio_max  = max(enpv0ratio),
+
+    go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
+    go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
+    go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
+  )
+}
+
+byGroupAndSpendBin    <- byGroupAnd(merged, 'spend_bin')
+byGroupAndSpendLogBin <- byGroupAnd(merged, 'spend_logbin')
+
 byGroupAndEnpv0DiffBin <- ddply(
   merged,
   .(igroup, enpv0diff_bin),
@@ -353,7 +317,7 @@ for (group in unique(pf$igroup)) {
 # x: go-rate
 # y: mean (go-corrected) intervention rNPV (grouped by intervention spend)
 
-pf <- pcGoByGroupAndSpendLogBin
+pf<- byGroupAndSpendLogBin
 pf <- subset(pf, pf$go_corrected_enpv_spend_mean <= -1) # cutoffs for visual purposes
 plot(
   -pf$go_corrected_enpv_spend_mean,
