@@ -3,6 +3,7 @@ library(plyr)
 # =============== Options ==================
 options(scipen=999)                     # Turn off scientific notation
 DISCOUNT_RATE <- 0.04                   # State discount rate assumption
+WASTE         <- 0.35                   # State inefficiency asspumption
 df <- read.csv("./output/example.csv")  # Input data
 write_to_file <- TRUE                   # Write to file?
 # ==========================================
@@ -71,13 +72,21 @@ tmp$cashflow4 <- tmp$revenue4 - tmp$cost4
 tmp$cashflow5 <- tmp$revenue5 - tmp$cost5
 tmp$cashflow  <- tmp$revenue - tmp$cost
 
-# Compute cumulative time spent at different points
+# Compute cumulative time spent at different points from PC
 tmp$timeto0 <- 0
 tmp$timeto1 <- tmp$time0
 tmp$timeto2 <- tmp$time0 + tmp$time1
 tmp$timeto3 <- tmp$time0 + tmp$time1 + tmp$time2
 tmp$timeto4 <- tmp$time0 + tmp$time1 + tmp$time2 + tmp$time3
 tmp$timeto5 <- tmp$time0 + tmp$time1 + tmp$time2 + tmp$time3 + tmp$time4
+
+# Compute inefficiency-corrected cumulative time spent at different points from PC
+tmp$ineff_timeto0 <- 0
+tmp$ineff_timeto1 <- tmp$ineff_timeto0 + (tmp$time0 * (1+WASTE))
+tmp$ineff_timeto2 <- tmp$ineff_timeto1 + (tmp$time1 * (1+WASTE))
+tmp$ineff_timeto3 <- tmp$ineff_timeto2 + (tmp$time2 * (1+WASTE))
+tmp$ineff_timeto4 <- tmp$ineff_timeto3 + (tmp$time3 * (1+WASTE))
+tmp$ineff_timeto5 <- tmp$ineff_timeto4 + (tmp$time4 * (1+WASTE))
 
 # Compute public ENPV (IS PROB HANDLED CORRECTLY HERE?)
 tmp$public_epv0 <- (tmp$revenue0-tmp$cost0)/((1+DISCOUNT_RATE)^tmp$timeto0) * 1
@@ -87,6 +96,17 @@ tmp$public_epv3 <- (tmp$revenue3-tmp$cost3)/((1+DISCOUNT_RATE)^tmp$timeto3) * tm
 tmp$public_epv4 <- (tmp$revenue4-tmp$cost4)/((1+DISCOUNT_RATE)^tmp$timeto4) * tmp$prob3
 tmp$public_epv5 <- (tmp$revenue5-tmp$cost5)/((1+DISCOUNT_RATE)^tmp$timeto5) * tmp$prob4
 tmp$public_enpv0 <- tmp$public_epv0 + tmp$public_epv1 + tmp$public_epv2 + tmp$public_epv3 + tmp$public_epv4 + tmp$public_epv5
+
+# Compute inefficiency-corrected public ENPV (IS PROB HANDLED CORRECTLY HERE?)
+# NOTE: Prob is not reduced by inefficiency since that actually improves rNPV.
+# This might be an issue that needs to be adressed!
+tmp$ineff_public_epv0 <- (tmp$revenue0-tmp$cost0*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto0)) * 1
+tmp$ineff_public_epv1 <- (tmp$revenue1-tmp$cost1*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto1)) * (tmp$prob0)
+tmp$ineff_public_epv2 <- (tmp$revenue2-tmp$cost2*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto2)) * (tmp$prob1)
+tmp$ineff_public_epv3 <- (tmp$revenue3-tmp$cost3*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto3)) * (tmp$prob2)
+tmp$ineff_public_epv4 <- (tmp$revenue4-tmp$cost4*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto4)) * (tmp$prob3)
+tmp$ineff_public_epv5 <- (tmp$revenue5-tmp$cost5*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto5)) * (tmp$prob4)
+tmp$ineff_public_enpv0 <- tmp$ineff_public_epv0 + tmp$ineff_public_epv1 + tmp$ineff_public_epv2 + tmp$ineff_public_epv3 + tmp$ineff_public_epv4 + tmp$ineff_public_epv5
 
 # Split on intervention/base and join horizontally to allow comparisons
 tmp0 <- subset(tmp, tmp$group == 'base')              # base
@@ -154,6 +174,9 @@ byGroupAndSpendBin <- ddply(
   public_enpv0_max  = max(public_enpv0),
   public_enpv0_min  = min(public_enpv0),
   public_enpv0_mean = mean(public_enpv0),
+  ineff_public_enpv0_max  = max(ineff_public_enpv0),
+  ineff_public_enpv0_min  = min(ineff_public_enpv0),
+  ineff_public_enpv0_mean = mean(ineff_public_enpv0),
   enpv0diff_mean  = mean(enpv0diff),
   enpv0diff_min   = min(enpv0diff),
   enpv0diff_max   = max(enpv0diff),
@@ -177,6 +200,9 @@ byGroupAndSpendLogBin <- ddply(
   public_enpv0_max  = max(public_enpv0),
   public_enpv0_min  = min(public_enpv0),
   public_enpv0_mean = mean(public_enpv0),
+  ineff_public_enpv0_max  = max(ineff_public_enpv0),
+  ineff_public_enpv0_min  = min(ineff_public_enpv0),
+  ineff_public_enpv0_mean = mean(ineff_public_enpv0),
   go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
   go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
   go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
@@ -200,6 +226,9 @@ pcGoByGroupAndSpendLogBin <- ddply(
   public_enpv0_max  = max(public_enpv0),
   public_enpv0_min  = min(public_enpv0),
   public_enpv0_mean = mean(public_enpv0),
+  ineff_public_enpv0_max  = max(ineff_public_enpv0),
+  ineff_public_enpv0_min  = min(ineff_public_enpv0),
+  ineff_public_enpv0_mean = mean(ineff_public_enpv0),
   go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
   go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
   go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
@@ -236,6 +265,7 @@ plot(
 )
 axis(1,log_tick_marks(1,5000), las=2)
 abline(v=c(min(base$cost), mean(base$cost), max(base$cost)), col='black', lty=c(3,2,3), lwd=1.5)
+abline(v=c(min(base$cost*(1+WASTE)), mean(base$cost*(1+WASTE)), max(base$cost*(1+WASTE))), col='darkgrey', lty=c(3,2,3), lwd=1.5)
 mtext(side = 1, line = 4, '(Dashed lines represent min/mean/max development cost)')
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 
@@ -260,7 +290,7 @@ plot(
 )
 axis(1,log_tick_marks(1,5000), las=2)
 abline(v=c(min(base$cost), mean(base$cost), max(base$cost)), col='black', lty=c(3,2,3), lwd=1.5)
-#mtext(side = 1, line = 4, '(Dashed lines represent min/mean/max development cost)')
+abline(v=c(min(base$cost*(1+WASTE)), mean(base$cost*(1+WASTE)), max(base$cost*(1+WASTE))), col='darkgrey', lty=c(3,2,3), lwd=1.5)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
@@ -293,8 +323,8 @@ plot(
   ylab = 'Go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
-abline(v=c( min(-base$public_enpv0), max(-base$public_enpv0) ), col='red', lty=3, lwd=1.5)
-abline(v=c( min(-pf$public_enpv0_mean), mean(-pf$public_enpv0_mean), max(-pf$public_enpv0_mean) ), col='black', lty=c(3,2,3), lwd=1.5)
+abline(v=c(min(-base$public_enpv0), mean(-base$public_enpv0), max(-base$public_enpv0)), col='black', lty=c(3,2,3), lwd=1.5)
+abline(v=c( min(-base$ineff_public_enpv0), mean(-base$ineff_public_enpv0), max(-base$ineff_public_enpv0)), col='darkgrey', lty=c(3,2,3), lwd=1.5)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
@@ -309,6 +339,10 @@ for (group in unique(pf$igroup)) {
 # - The MC sim itself needs to support expressions so that we can do log10 sampling... syntax: [1-9]*10**[0-4]/2
 # - Make sure that the plot stabilizes
 # - Compute quartiles (use quartile/quantile lib from other example) and create a similar plot but where I print the field in a semi-transparent color so that the overlap is more evident.
+
+
+
+
 
 
 
@@ -334,8 +368,8 @@ plot(
   ylab = 'Go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
-abline(v=c( min(-base$public_enpv0), max(-base$public_enpv0) ), col='red', lty=3, lwd=1.5)
-abline(v=c( min(-pf$public_enpv0_mean), mean(-pf$public_enpv0_mean), max(-pf$public_enpv0_mean) ), col='black', lty=c(3,2,3), lwd=1.5)
+abline(v=c(min(-base$public_enpv0), mean(-base$public_enpv0), max(-base$public_enpv0)), col='black', lty=c(3,2,3), lwd=1.5)
+abline(v=c( min(-base$ineff_public_enpv0), mean(-base$ineff_public_enpv0), max(-base$ineff_public_enpv0)), col='darkgrey', lty=c(3,2,3), lwd=1.5)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub = pf[pf$igroup == group, ]
@@ -358,7 +392,6 @@ for (group in unique(pf$igroup)) {
 #
 
 pf <- byGroupAndSpendBin
-#pf <- pf[-pf$enpv_spend_mean >= 1 & -pf$enpv_spend_mean <= 5000,] # visual cutoffs
 plot(
   -pf$enpv_spend_mean,
   pf$igo_ratio,
@@ -372,8 +405,6 @@ plot(
   ylab = 'Go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
-#abline(v=c( min(-base$public_enpv0), mean(-base$public_enpv0), max(-base$public_enpv0) ), col='black', lty=c(3,2,3), lwd=1.5)
-abline(v=c( min(-pf$public_enpv0_mean), mean(-pf$public_enpv0_mean), max(-pf$public_enpv0_mean) ), col='black', lty=c(3,2,3), lwd=1.5)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
