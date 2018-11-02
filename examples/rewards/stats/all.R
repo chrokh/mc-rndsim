@@ -4,6 +4,7 @@ library(plyr)
 options(scipen=999)                     # Turn off scientific notation
 DISCOUNT_RATE <- 0.04                   # State discount rate assumption
 WASTE         <- 0.35                   # State inefficiency asspumption
+GAMING        <- 0.1                    # Risk of gaming assumption
 df <- read.csv("./output/example.csv")  # Input data
 write_to_file <- TRUE                   # Write to file?
 # ==========================================
@@ -137,6 +138,24 @@ merged$epv_spend4 <- -(merged$spend4 / ((1+DISCOUNT_RATE)^merged$itimeto4)) * me
 merged$epv_spend5 <- -(merged$spend5 / ((1+DISCOUNT_RATE)^merged$itimeto5)) * merged$iprob4
 merged$enpv_spend <- merged$epv_spend0 + merged$epv_spend1 + merged$epv_spend2 + merged$epv_spend3 + merged$epv_spend4 + merged$epv_spend5
 
+# Compute gaming-corrected prob (TODO: This is not an appropriate calculation but I need to think a bit more about it)
+# TODO: I'm not sure this calculation actually reflects what I want to describe. I actually want to describe something like:
+# If they fail there's an X risk that they will lie about it. What is the prob that it looks like a success to us?
+merged$gaming_corrected_iprob0 <- ifelse(merged$spend1>0, 1-(1-merged$prob0)*(1-GAMING), merged$prob0)
+merged$gaming_corrected_iprob1 <- ifelse(merged$spend2>0, 1-(1-merged$prob1)*(1-GAMING), merged$prob1)
+merged$gaming_corrected_iprob2 <- ifelse(merged$spend3>0, 1-(1-merged$prob2)*(1-GAMING), merged$prob2)
+merged$gaming_corrected_iprob3 <- ifelse(merged$spend4>0, 1-(1-merged$prob3)*(1-GAMING), merged$prob3)
+merged$gaming_corrected_iprob4 <- ifelse(merged$spend5>0, 1-(1-merged$prob4)*(1-GAMING), merged$prob4)
+
+# Compute gaming-corrected enpv spend
+merged$gaming_corrected_epv_spend0 <- -(merged$spend0 / ((1+DISCOUNT_RATE)^merged$itimeto0)) * 1
+merged$gaming_corrected_epv_spend1 <- -(merged$spend1 / ((1+DISCOUNT_RATE)^merged$itimeto1)) * merged$gaming_corrected_iprob0
+merged$gaming_corrected_epv_spend2 <- -(merged$spend2 / ((1+DISCOUNT_RATE)^merged$itimeto2)) * merged$gaming_corrected_iprob1
+merged$gaming_corrected_epv_spend3 <- -(merged$spend3 / ((1+DISCOUNT_RATE)^merged$itimeto3)) * merged$gaming_corrected_iprob2
+merged$gaming_corrected_epv_spend4 <- -(merged$spend4 / ((1+DISCOUNT_RATE)^merged$itimeto4)) * merged$gaming_corrected_iprob3
+merged$gaming_corrected_epv_spend5 <- -(merged$spend5 / ((1+DISCOUNT_RATE)^merged$itimeto5)) * merged$gaming_corrected_iprob4
+merged$gaming_corrected_enpv_spend <- merged$gaming_corrected_epv_spend0 + merged$gaming_corrected_epv_spend1 + merged$gaming_corrected_epv_spend2 + merged$gaming_corrected_epv_spend3 + merged$gaming_corrected_epv_spend4 + merged$gaming_corrected_epv_spend5
+
 # Compute enpv improvements
 merged$enpv0diff  <- merged$ienpv0 - merged$enpv0
 bottom <- abs(min(merged$enpv0, merged$ienpv0)) + 1
@@ -188,9 +207,17 @@ byGroupAnd <- function(df, spend_key) {
     enpv0ratio_min  = min(enpv0ratio),
     enpv0ratio_max  = max(enpv0ratio),
 
-    go_corrected_enpv_spend_max  = max(enpv_spend[decision0 == 'true']),
-    go_corrected_enpv_spend_min  = min(enpv_spend[decision0 == 'true']),
-    go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true'])
+    go_corrected_enpv_spend_max  = max(enpv_spend[decision0  == 'true']),
+    go_corrected_enpv_spend_min  = min(enpv_spend[decision0  == 'true']),
+    go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true']),
+    
+    gaming_and_go_corrected_enpv_spend_max  = max(gaming_corrected_enpv_spend[decision0  == 'true']),
+    gaming_and_go_corrected_enpv_spend_min  = min(gaming_corrected_enpv_spend[decision0  == 'true']),
+    gaming_and_go_corrected_enpv_spend_mean = mean(gaming_corrected_enpv_spend[decision0 == 'true']),
+    
+    go_corrected_prob_mean = mean(ifelse(idecision0=='true', iprob, 0)),
+    go_corrected_prob_min  = min(ifelse(idecision0=='true',  iprob, 0)),
+    go_corrected_prob_max  = max(ifelse(idecision0=='true',  iprob, 0))
   )
 }
 
@@ -303,6 +330,72 @@ for (group in unique(pf$igroup)) {
 # - The MC sim itself needs to support expressions so that we can do log10 sampling... syntax: [1-9]*10**[0-4]/2
 # - Make sure that the plot stabilizes
 # - Compute quartiles (use quartile/quantile lib from other example) and create a similar plot but where I print the field in a semi-transparent color so that the overlap is more evident.
+
+
+
+
+#
+# MEAN LIKELIHOOD OF OUTPUT PER ENTRY
+#
+# x: mean inverse go-corrected intervention rNPV
+# y: mean go-corrected likelihood of market entry per PC entry
+#
+
+pf <- byGroupAndSpendLogBin
+# Note: cutting off some of the data for visual purposes
+pf <- pf[-pf$go_corrected_enpv_spend_mean >= 1, ]
+plot(
+  -pf$go_corrected_enpv_spend_mean,
+  pf$go_corrected_prob_mean * 100,
+  col = as.factor(pf$igroup),
+  log = 'x',
+  las = 2,
+  pch = 16,
+  xaxt = 'n',
+  xlab = 'Mean go-corrected rNPV of public intervention expenditure',
+  ylab = 'Mean go-corrected likelihood of market entry per pre clinical entry (%)'
+)
+axis(1, log_tick_marks(10, 4000), las=2)
+legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
+for (group in unique(pf$igroup)) {
+  sub <- subset(pf, pf$igroup == group)
+  lines(-sub$go_corrected_enpv_spend_mean, sub$go_corrected_prob_mean * 100, col = sub$igroup)
+}
+abline(h=mean(base$prob*(1-WASTE)*100), lty=2, col='darkgrey')
+abline(v=mean(-base$public_enpv0), lty=2, col='darkgrey')
+points(mean(-base$public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
+
+
+
+
+#
+# x: mean inverse intervention rNPV
+# y: mean go-corrected & gaming-corrected likelihood of market entry per PC entry
+#
+
+pf <- byGroupAndSpendLogBin
+# Note: cutting off some of the data for visual purposes
+pf <- pf[-pf$gaming_and_go_corrected_enpv_spend_mean >= 1, ]
+plot(
+  -pf$gaming_and_go_corrected_enpv_spend_mean,
+  pf$go_corrected_prob_mean * 100,
+  col = as.factor(pf$igroup),
+  log = 'x',
+  las = 2,
+  pch = 16,
+  xaxt = 'n',
+  xlab = 'Mean go- and gaming-corrected rNPV of public intervention expenditure',
+  ylab = 'Mean go-corrected likelihood of market entry per pre clinical entry (%)'
+)
+axis(1, log_tick_marks(10, 4000), las=2)
+legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
+for (group in unique(pf$igroup)) {
+  sub <- subset(pf, pf$igroup == group)
+  lines(-sub$gaming_and_go_corrected_enpv_spend_mean, sub$go_corrected_prob_mean * 100, col = sub$igroup)
+}
+abline(h=mean(base$prob*(1-WASTE)*100), lty=2, col='darkgrey')
+abline(v=mean(-base$public_enpv0), lty=2, col='darkgrey')
+points(mean(-base$public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 
 
