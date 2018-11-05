@@ -218,13 +218,13 @@ byGroupAnd <- function(df, spend_key) {
     enpv0ratio_min  = min(enpv0ratio),
     enpv0ratio_max  = max(enpv0ratio),
 
-    go_corrected_enpv_spend_max  = max(enpv_spend[decision0  == 'true']),
-    go_corrected_enpv_spend_min  = min(enpv_spend[decision0  == 'true']),
-    go_corrected_enpv_spend_mean = mean(enpv_spend[decision0 == 'true']),
+    go_corrected_enpv_spend_max  = max(enpv_spend[idecision0  == 'true']),
+    go_corrected_enpv_spend_min  = min(enpv_spend[idecision0  == 'true']),
+    go_corrected_enpv_spend_mean = mean(enpv_spend[idecision0 == 'true']),
     
-    gaming_and_go_corrected_enpv_spend_max  = max(gaming_corrected_enpv_spend[decision0  == 'true']),
-    gaming_and_go_corrected_enpv_spend_min  = min(gaming_corrected_enpv_spend[decision0  == 'true']),
-    gaming_and_go_corrected_enpv_spend_mean = mean(gaming_corrected_enpv_spend[decision0 == 'true']),
+    gaming_and_go_corrected_enpv_spend_max  = max(gaming_corrected_enpv_spend[idecision0  == 'true']),
+    gaming_and_go_corrected_enpv_spend_min  = min(gaming_corrected_enpv_spend[idecision0  == 'true']),
+    gaming_and_go_corrected_enpv_spend_mean = mean(gaming_corrected_enpv_spend[idecision0 == 'true']),
     
     go_corrected_prob_mean = mean(ifelse(idecision0=='true', iprob, 0)),
     go_corrected_prob_min  = min(ifelse(idecision0=='true',  iprob, 0)),
