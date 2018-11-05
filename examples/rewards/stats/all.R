@@ -412,43 +412,6 @@ points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 
 
-#
-# x: mean go-corrected & gaming-corrected inverse intervention rNPV
-# y: mean go-corrected likelihood of market entry per PC entry
-#
-
-pf <- byGroupAndSpendLogBin
-# Note: cutting off some of the data for visual purposes
-pf <- pf[-pf$gaming_and_go_corrected_enpv_spend_mean >= 1, ]
-plot(
-  -pf$gaming_and_go_corrected_enpv_spend_mean,
-  pf$go_corrected_prob_mean * 100,
-  col = as.factor(pf$igroup),
-  log = 'x',
-  las = 2,
-  pch = 16,
-  xaxt = 'n',
-  xlab = 'Mean rNPV of public intervention expenditure',
-  ylab = 'Mean likelihood of market entry per PC entry (%)'
-)
-axis(1, log_tick_marks(10, 4000), las=2)
-mtext(side=2, line=2, text='(go-corrected)')
-mtext(side=1, line=4, text='(go- and gaming-corrected)')
-legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
-for (group in unique(pf$igroup)) {
-  sub <- subset(pf, pf$igroup == group)
-  lines(-sub$gaming_and_go_corrected_enpv_spend_mean, sub$go_corrected_prob_mean * 100, col = sub$igroup)
-}
-abline(h=mean(base$prob*(1-WASTE)*100), lty=2, col='darkgrey')
-abline(v=mean(-base$ineff_public_enpv0), lty=2, col='darkgrey')
-points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
-
-
-
-
-
-
-
 
 
 
