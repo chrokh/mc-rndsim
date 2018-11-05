@@ -89,7 +89,7 @@ tmp$ineff_timeto3 <- tmp$ineff_timeto2 + (tmp$time2 * (1+WASTE))
 tmp$ineff_timeto4 <- tmp$ineff_timeto3 + (tmp$time3 * (1+WASTE))
 tmp$ineff_timeto5 <- tmp$ineff_timeto4 + (tmp$time4 * (1+WASTE))
 
-# Compute public ENPV (IS PROB HANDLED CORRECTLY HERE?)
+# Compute public ENPV (TODO: IS PROB HANDLED CORRECTLY IN THE ENPV CALCULATIONS ???)
 tmp$public_epv0 <- (tmp$revenue0-tmp$cost0)/((1+DISCOUNT_RATE)^tmp$timeto0) * 1
 tmp$public_epv1 <- (tmp$revenue1-tmp$cost1)/((1+DISCOUNT_RATE)^tmp$timeto1) * tmp$prob0
 tmp$public_epv2 <- (tmp$revenue2-tmp$cost2)/((1+DISCOUNT_RATE)^tmp$timeto2) * tmp$prob1
@@ -98,16 +98,23 @@ tmp$public_epv4 <- (tmp$revenue4-tmp$cost4)/((1+DISCOUNT_RATE)^tmp$timeto4) * tm
 tmp$public_epv5 <- (tmp$revenue5-tmp$cost5)/((1+DISCOUNT_RATE)^tmp$timeto5) * tmp$prob4
 tmp$public_enpv0 <- tmp$public_epv0 + tmp$public_epv1 + tmp$public_epv2 + tmp$public_epv3 + tmp$public_epv4 + tmp$public_epv5
 
-# Compute inefficiency-corrected public ENPV (IS PROB HANDLED CORRECTLY HERE?)
-# NOTE: Prob is not reduced by inefficiency since that actually improves rNPV.
-# This might be an issue that needs to be adressed!
+# Compute inefficiency-corrected public ENPV
 tmp$ineff_public_epv0 <- (tmp$revenue0-tmp$cost0*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto0)) * 1
-tmp$ineff_public_epv1 <- (tmp$revenue1-tmp$cost1*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto1)) * (tmp$prob0)
-tmp$ineff_public_epv2 <- (tmp$revenue2-tmp$cost2*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto2)) * (tmp$prob1)
-tmp$ineff_public_epv3 <- (tmp$revenue3-tmp$cost3*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto3)) * (tmp$prob2)
-tmp$ineff_public_epv4 <- (tmp$revenue4-tmp$cost4*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto4)) * (tmp$prob3)
-tmp$ineff_public_epv5 <- (tmp$revenue5-tmp$cost5*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto5)) * (tmp$prob4)
+tmp$ineff_public_epv1 <- (tmp$revenue1-tmp$cost1*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto1)) * (tmp$prob0*(1-WASTE))
+tmp$ineff_public_epv2 <- (tmp$revenue2-tmp$cost2*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto2)) * (tmp$prob1*(1-WASTE))
+tmp$ineff_public_epv3 <- (tmp$revenue3-tmp$cost3*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto3)) * (tmp$prob2*(1-WASTE))
+tmp$ineff_public_epv4 <- (tmp$revenue4-tmp$cost4*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto4)) * (tmp$prob3*(1-WASTE))
+tmp$ineff_public_epv5 <- (tmp$revenue5-tmp$cost5*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto5)) * (tmp$prob4*(1-WASTE))
 tmp$ineff_public_enpv0 <- tmp$ineff_public_epv0 + tmp$ineff_public_epv1 + tmp$ineff_public_epv2 + tmp$ineff_public_epv3 + tmp$ineff_public_epv4 + tmp$ineff_public_epv5
+
+# Compute inefficiency-corrected public ENPV (IS PROB HANDLED CORRECTLY HERE?)
+tmp$ineff_cash_only_public_epv0  <- (tmp$revenue0-tmp$cost0*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto0)) * 1
+tmp$ineff_cash_only_public_epv1  <- (tmp$revenue1-tmp$cost1*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto1)) * (tmp$prob0)
+tmp$ineff_cash_only_public_epv2  <- (tmp$revenue2-tmp$cost2*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto2)) * (tmp$prob1)
+tmp$ineff_cash_only_public_epv3  <- (tmp$revenue3-tmp$cost3*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto3)) * (tmp$prob2)
+tmp$ineff_cash_only_public_epv4  <- (tmp$revenue4-tmp$cost4*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto4)) * (tmp$prob3)
+tmp$ineff_cash_only_public_epv5  <- (tmp$revenue5-tmp$cost5*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto5)) * (tmp$prob4)
+tmp$ineff_cash_only_public_enpv0 <- tmp$ineff_cash_only_public_epv0 + tmp$ineff_cash_only_public_epv1 + tmp$ineff_cash_only_public_epv2 + tmp$ineff_cash_only_public_epv3 + tmp$ineff_cash_only_public_epv4 + tmp$ineff_cash_only_public_epv5
 
 # Split on intervention/base and join horizontally to allow comparisons
 tmp0 <- subset(tmp, tmp$group == 'base')              # base
@@ -198,6 +205,10 @@ byGroupAnd <- function(df, spend_key) {
     ineff_public_enpv0_max  = max(ineff_public_enpv0),
     ineff_public_enpv0_min  = min(ineff_public_enpv0),
     ineff_public_enpv0_mean = mean(ineff_public_enpv0),
+
+    ineff_cash_only_public_enpv0_max  = max(ineff_cash_only_public_enpv0),
+    ineff_cash_only_public_enpv0_min  = min(ineff_cash_only_public_enpv0),
+    ineff_cash_only_public_enpv0_mean = mean(ineff_cash_only_public_enpv0),
 
     enpv0diff_mean  = mean(enpv0diff),
     enpv0diff_min   = min(enpv0diff),
@@ -335,8 +346,6 @@ for (group in unique(pf$igroup)) {
 
 
 #
-# MEAN LIKELIHOOD OF OUTPUT PER ENTRY
-#
 # x: mean inverse go-corrected intervention rNPV
 # y: mean go-corrected likelihood of market entry per PC entry
 #
@@ -352,25 +361,27 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
-  xlab = 'Mean go-corrected rNPV of public intervention expenditure',
-  ylab = 'Mean go-corrected likelihood of market entry per pre clinical entry (%)'
+  xlab = 'Mean rNPV of public intervention expenditure',
+  ylab = 'Mean likelihood of market entry per PC entry (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
+mtext(side=2, line=2, text='(go-corrected)')
+mtext(side=1, line=4, text='(go-corrected)')
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- subset(pf, pf$igroup == group)
   lines(-sub$go_corrected_enpv_spend_mean, sub$go_corrected_prob_mean * 100, col = sub$igroup)
 }
 abline(h=mean(base$prob*(1-WASTE)*100), lty=2, col='darkgrey')
-abline(v=mean(-base$public_enpv0), lty=2, col='darkgrey')
-points(mean(-base$public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
+abline(v=mean(-base$ineff_public_enpv0), lty=2, col='darkgrey')
+points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 
-
+ 
 
 #
-# x: mean inverse intervention rNPV
-# y: mean go-corrected & gaming-corrected likelihood of market entry per PC entry
+# x: mean go-corrected & gaming-corrected inverse intervention rNPV
+# y: mean go-corrected likelihood of market entry per PC entry
 #
 
 pf <- byGroupAndSpendLogBin
@@ -384,18 +395,54 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
-  xlab = 'Mean go- and gaming-corrected rNPV of public intervention expenditure',
-  ylab = 'Mean go-corrected likelihood of market entry per pre clinical entry (%)'
+  xlab = 'Mean rNPV of public intervention expenditure',
+  ylab = 'Mean likelihood of market entry per PC entry (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
+mtext(side=2, line=2, text='(go-corrected)')
+mtext(side=1, line=4, text='(go- and gaming-corrected)')
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- subset(pf, pf$igroup == group)
   lines(-sub$gaming_and_go_corrected_enpv_spend_mean, sub$go_corrected_prob_mean * 100, col = sub$igroup)
 }
 abline(h=mean(base$prob*(1-WASTE)*100), lty=2, col='darkgrey')
-abline(v=mean(-base$public_enpv0), lty=2, col='darkgrey')
-points(mean(-base$public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
+abline(v=mean(-base$ineff_public_enpv0), lty=2, col='darkgrey')
+points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
+
+
+
+#
+# x: mean go-corrected & gaming-corrected inverse intervention rNPV
+# y: mean go-corrected likelihood of market entry per PC entry
+#
+
+pf <- byGroupAndSpendLogBin
+# Note: cutting off some of the data for visual purposes
+pf <- pf[-pf$gaming_and_go_corrected_enpv_spend_mean >= 1, ]
+plot(
+  -pf$gaming_and_go_corrected_enpv_spend_mean,
+  pf$go_corrected_prob_mean * 100,
+  col = as.factor(pf$igroup),
+  log = 'x',
+  las = 2,
+  pch = 16,
+  xaxt = 'n',
+  xlab = 'Mean rNPV of public intervention expenditure',
+  ylab = 'Mean likelihood of market entry per PC entry (%)'
+)
+axis(1, log_tick_marks(10, 4000), las=2)
+mtext(side=2, line=2, text='(go-corrected)')
+mtext(side=1, line=4, text='(go- and gaming-corrected)')
+legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
+for (group in unique(pf$igroup)) {
+  sub <- subset(pf, pf$igroup == group)
+  lines(-sub$gaming_and_go_corrected_enpv_spend_mean, sub$go_corrected_prob_mean * 100, col = sub$igroup)
+}
+abline(h=mean(base$prob*(1-WASTE)*100), lty=2, col='darkgrey')
+abline(v=mean(-base$ineff_public_enpv0), lty=2, col='darkgrey')
+points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
+
 
 
 
@@ -407,8 +454,8 @@ points(mean(-base$public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 #
 #
-# x: go-rate
-# y: mean (go-corrected) intervention rNPV (grouped by intervention spend)
+# y: go-rate
+# x: mean (go-corrected) intervention rNPV (grouped by intervention spend)
 
 pf<- byGroupAndSpendLogBin
 pf <- subset(pf, pf$go_corrected_enpv_spend_mean <= -1) # cutoffs for visual purposes
@@ -421,10 +468,11 @@ plot(
   pch = 16,
   xaxt = 'n',
   xlim = c(20, 3000),
-  xlab = 'Mean go-corrected rNPV of public intervention expenditure',
+  xlab = 'Mean rNPV of public intervention expenditure',
   ylab = 'Go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
+mtext(side=1, line=4, text='(go-corrected)')
 abline(v=c(min(-base$public_enpv0), mean(-base$public_enpv0), max(-base$public_enpv0)), col='black', lty=c(3,2,3), lwd=1.5)
 abline(v=c( min(-base$ineff_public_enpv0), mean(-base$ineff_public_enpv0), max(-base$ineff_public_enpv0)), col='darkgrey', lty=c(3,2,3), lwd=1.5)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
