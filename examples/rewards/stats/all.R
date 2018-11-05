@@ -339,7 +339,6 @@ for (group in unique(pf$igroup)) {
 
 # TODO FOR THIS PLOT:
 # - The MC sim itself needs to support expressions so that we can do log10 sampling... syntax: [1-9]*10**[0-4]/2
-# - Make sure that the plot stabilizes
 # - Compute quartiles (use quartile/quantile lib from other example) and create a similar plot but where I print the field in a semi-transparent color so that the overlap is more evident.
 
 
