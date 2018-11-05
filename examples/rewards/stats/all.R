@@ -247,12 +247,8 @@ byGroupAndEnpv0DiffBin <- ddply(
 # =====================================
 
 
-
-
-#
-# NON-CAPITALIZED
-#
-
+# go-rate ~ non-capitalized cost (not log samples)
+# ================================================
 pf <- byGroupAndSpendBin
 plot(
   pf$spend_bin,
@@ -272,11 +268,8 @@ mtext(side = 1, line = 4, '(Dashed lines represent min/mean/max development cost
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 
 
-
-#
-# NON-CAPITALIZED (log samples)
-#
-
+# go-rate ~ non-capitalized intervention size
+# ===========================================
 pf <- byGroupAndSpendLogBin
 plot(
   pf$spend_logbin,
@@ -300,15 +293,8 @@ for (group in unique(pf$igroup)) {
 }
 
 
-
-
-#
-# ENPV BASED
-#
-# x: go-rate
-# y: mean spend rNPV (grouped by intervention spend)
-#
-
+# go-rate ~ rNPV (grouped by intervention spend)
+# ==============================================
 pf <- byGroupAndSpendLogBin
 # Note: cutting off some of the data for visual purposes
 pf <- pf[-pf$enpv_spend_mean >= 1 & -pf$enpv_spend_mean <= 5000,]
@@ -333,18 +319,8 @@ for (group in unique(pf$igroup)) {
   lines(-sub$enpv_spend_mean, sub$igo_ratio, col = sub$igroup)
 }
 
-# TODO FOR THIS PLOT:
-# - The MC sim itself needs to support expressions so that we can do log10 sampling... syntax: [1-9]*10**[0-4]/2
-# - Compute quartiles (use quartile/quantile lib from other example) and create a similar plot but where I print the field in a semi-transparent color so that the overlap is more evident.
-
-
-
-
-#
-# x: mean inverse go-corrected intervention rNPV
-# y: mean go-corrected likelihood of market entry per PC entry
-#
-
+# entries ~ rNPV (go-corrected)
+# =============================
 pf <- byGroupAndSpendLogBin
 # Note: cutting off some of the data for visual purposes
 pf <- pf[-pf$go_corrected_enpv_spend_mean >= 1, ]
@@ -372,13 +348,8 @@ abline(v=mean(-base$ineff_public_enpv0), lty=2, col='darkgrey')
 points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 
- 
-
-#
-# x: mean go-corrected & gaming-corrected inverse intervention rNPV
-# y: mean go-corrected likelihood of market entry per PC entry
-#
-
+# entries ~ rNPV (gaming + go-corrected)
+# ======================================
 pf <- byGroupAndSpendLogBin
 # Note: cutting off some of the data for visual purposes
 pf <- pf[-pf$gaming_and_go_corrected_enpv_spend_mean >= 1, ]
@@ -406,15 +377,8 @@ abline(v=mean(-base$ineff_public_enpv0), lty=2, col='darkgrey')
 points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 
-
-
-
-
-#
-#
-# y: go-rate
-# x: mean (go-corrected) intervention rNPV (grouped by intervention spend)
-
+# go-rate ~ rNPV (go-corrected)
+# =============================
 pf<- byGroupAndSpendLogBin
 pf <- subset(pf, pf$go_corrected_enpv_spend_mean <= -1) # cutoffs for visual purposes
 plot(
@@ -440,89 +404,8 @@ for (group in unique(pf$igroup)) {
 }
 
 
-
-
-#
-# ENPV BASED (without log-based samples)
-#
-# x: go-rate
-# y: mean spend rNPV
-# grouped by intervention spend (i.e. worlds with different interventions)
-#
-
-pf <- byGroupAndSpendBin
-plot(
-  -pf$enpv_spend_mean,
-  pf$igo_ratio,
-  col = as.factor(pf$igroup),
-  log = 'xy',
-  las = 2,
-  pch = 16,
-  xaxt = 'n',
-  xlim = c(20, 3000),
-  xlab = 'Mean rNPV of public intervention expenditure',
-  ylab = 'Go-decisions (%)'
-)
-axis(1, log_tick_marks(10, 4000), las=2)
-legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
-for (group in unique(pf$igroup)) {
-  sub <- pf[pf$igroup == group,]
-  lines(-sub$enpv_spend_mean, sub$igo_ratio, col = sub$igroup)
-}
-
-
-
-
-#
-# MEAN ENPV BIN ~ SPEND BIN (log-log)
-#
-
-pf <- byGroupAndSpendBin
-pf <- pf[pf$spend_bin <= 1000 & pf$spend_bin >= 50, ]
-layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
-for(group in unique(pf$igroup)[unique(pf$igroup) != 'prize0']) {
-  sub <- pf[pf$igroup == group, ]
-  mod <- lm(log(-sub$enpv_spend_mean) ~ log(sub$spend_bin))
-  plot(
-    sub$spend_bin, -sub$enpv_spend_mean,
-    log='xy',
-    main = sprintf('%s (mean: y = %sx + %s)', group, round(mod$coefficients[2],4), round(mod$coefficients[1],4)),
-    xlab = 'Intervention size',
-    ylab = 'Inverse rNPV of intervention (min/mean/max)',
-    xlim = c(min(pf$spend_bin),        max(pf$spend_bin)),
-    ylim = c(min(-pf$enpv_spend_mean), max(-pf$enpv_spend_mean)),
-    type='l')
-  if (group != 'prize0') {
-    lines(sub$spend_bin, -sub$enpv_spend_max, lty=3)
-    lines(sub$spend_bin, -sub$enpv_spend_min, lty=3)
-  }
-}
-plot(
-  pf$spend_bin,
-  -pf$enpv_spend_mean,
-  col = 'white',
-  log = 'xy',
-  las = 2,
-  pch = 16,
-  main = 'all means (log-log)',
-  xlab = 'Intervention size',
-  ylab = 'Negative rNPV of spend'
-)
-for (group in pf$igroup) {
-  sub <- subset(pf, pf$igroup == group)
-  lines(sub$spend_bin, -sub$enpv_spend_mean, col=sub$igroup, pch=15)
-}
-legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
-par(mfrow=c(1,1)) # reset layout
-
-
-
-
-#
-# MEAN ENPV BIN ~ SPEND BIN
-#
-
-# Set layout and make all the plots
+# rNPV (not go-corrected) ~ intervention size
+# ===========================================
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
 pf <- byGroupAndSpendBin
 pf <- pf[pf$spend_bin <= 1000 & pf$spend_bin >= 50, ]
@@ -563,82 +446,18 @@ legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 par(mfrow=c(1,1)) # reset layout
 
 
-
-
-
-#
-# MEAN ENPV BIN ~ SPEND BIN (not same scale)
-#
-
-# Set layout and make all the plots
-pf <- byGroupAndSpendBin
-pf <- pf[pf$spend_bin <= 1000 & pf$spend_bin >= 50, ]
-layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
-for(group in unique(pf$igroup)[unique(pf$igroup) != 'prize0']) {
-  sub <- subset(pf, pf$igroup == group)
-  mod <- lm(-sub$enpv_spend_mean ~ sub$spend_bin)
-  plot(
-    sub$spend_bin, -sub$enpv_spend_mean,
-    main = sprintf('%s (mean: y = %sx + %s)', group, round(mod$coefficients[2],4), round(mod$coefficients[1],4)),
-    xlab = 'Intervention size',
-    ylab = 'Inverse rNPV of intervention (min/mean/max)',
-    type='l')
-  if (group != 'prize0') {
-    lines(sub$spend_bin, -sub$enpv_spend_max, lty=3)
-    lines(sub$spend_bin, -sub$enpv_spend_min, lty=3)
-  }
-}
-plot(
-  pf$spend_bin,
-  -pf$enpv_spend_mean,
-  col = 'white',
-  log = 'xy',
-  las = 2,
-  pch = 16,
-  main = 'all means (log-log)',
-  xlab = 'Intervention size',
-  ylab = 'Negative rNPV of spend'
-)
-for (group in unique(pf$igroup)) {
-  sub <- subset(pf, pf$igroup == group)
-  lines(sub$spend_bin, -sub$enpv_spend_mean, col=sub$igroup, pch=15)
-}
-legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
-par(mfrow=c(1,1)) # reset layout
-
-
-
-
-#
-# y: go-ratio
-# x: enpv0 diff
-#
-
+# go-ratio ~ PC rNPV diff
+# =======================
 pf <- byGroupAndEnpv0DiffBin
-plot(
-  pf$enpv0diff_bin,
-  pf$igo_ratio,
-  log = 'x',
-  col = pf$igroup
-)
+plot(pf$enpv0diff_bin, pf$igo_ratio, log = 'x', col = pf$igroup)
 for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
-  lines(
-    sub$enpv0diff_bin,
-    sub$igo_ratio,
-    col = sub$igroup
-  )
+  lines(sub$enpv0diff_bin, sub$igo_ratio, col = sub$igroup)
 }
 
 
-
-
-
-#
-# x: public enpv spend
-# y: enpv 0 diff
-#
-
+# rNPV ~ PC rNPV diff
+# ===================
 less <- merged[c(1:min(20000, nrow(merged))),]
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
 for ( group in unique(less$igroup)[unique(less$igroup)!='prize0'] ) {
@@ -662,14 +481,8 @@ legend('bottomright', legend=unique(less$igroup), pch=16, col=unique(less$igroup
 par(mfrow=c(1,1)) # reset layout
 
 
-
-
-
-#
-# y: ENPV improvement
-# x: Intervention size
-#
-
+# rNPV improvement ~ intervention size
+# ====================================
 grouped <- byGroupAndSpendBin
 fewer <- merged[c(1:min(10000, nrow(merged))),]
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
@@ -710,14 +523,9 @@ legend('bottomright', legend=unique(grouped$igroup), pch=16, col=unique(grouped$
 par(mfrow=c(1,1)) # reset layout
 
 
-
-#
-# y: ENPV improvement (min/mean/max)
-# x: Intervention size
-#
-
+# rNPV improvement (min/mean/max) ~ intervention size
+# ===================================================
 grouped <- byGroupAndSpendBin
-grouped[grouped$spend_bin <= 1000, ]
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
 for (group in unique(grouped[grouped$igroup!='prize0',]$igroup)) {
   plot(
@@ -730,9 +538,7 @@ for (group in unique(grouped[grouped$igroup!='prize0',]$igroup)) {
     ylab = 'rNPV (min/mean/max) (log)',
     main = group
   )
-  print(group)
   sub <- grouped[grouped$igroup==group,]
-  print(nrow(sub))
   lines(sub$spend_bin, sub$enpv0diff_mean)
   lines(sub$spend_bin, sub$enpv0diff_max, lty=3)
   lines(sub$spend_bin, sub$enpv0diff_min, lty=3)
@@ -754,12 +560,8 @@ legend('bottomright', legend=unique(grouped$igroup), pch=16, col=unique(grouped$
 par(mfrow=c(1,1)) # reset layout
 
 
-
-
-#
 # Correlation between spend and enpv spend for different subsets
-#
-
+# ===================================================
 N = 100000
 pf0 <- subset(merged, merged$spend0 > 0)[c(1:N),]
 pf1 <- subset(merged, merged$spend1 > 0)[c(1:N),]
@@ -791,3 +593,6 @@ cor.test(pfx$cost,  -pfx$public_enpv0)
 if (write_to_file)
   dev.off()
 
+# TODO:
+# - The MC sim itself needs to support expressions so that we can do log10 sampling... syntax: [1-9]*10**[0-4]/2
+# - Compute quartiles instead of min/mean/max (use quartile/quantile lib from other example) and create a similar plot but where I print the field in a semi-transparent color so that the overlap is more evident.
