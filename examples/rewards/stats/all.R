@@ -330,11 +330,7 @@ abline(v=c( min(-base$ineff_public_enpv0), mean(-base$ineff_public_enpv0), max(-
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
-  lines(
-    -sub$enpv_spend_mean,
-    sub$igo_ratio,
-    col = sub$igroup
-  )
+  lines(-sub$enpv_spend_mean, sub$igo_ratio, col = sub$igroup)
 }
 
 # TODO FOR THIS PLOT:
@@ -440,11 +436,7 @@ abline(v=c( min(-base$ineff_public_enpv0), mean(-base$ineff_public_enpv0), max(-
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub = pf[pf$igroup == group, ]
-  lines(
-    -sub$go_corrected_enpv_spend_mean,
-    sub$igo_ratio,
-    col = sub$igroup
-  )
+  lines(-sub$go_corrected_enpv_spend_mean, sub$igo_ratio, col = sub$igroup)
 }
 
 
@@ -475,11 +467,7 @@ axis(1, log_tick_marks(10, 4000), las=2)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
-  lines(
-    -sub$enpv_spend_mean,
-    sub$igo_ratio,
-    col = sub$igroup
-  )
+  lines(-sub$enpv_spend_mean, sub$igo_ratio, col = sub$igroup)
 }
 
 
@@ -592,7 +580,6 @@ for(group in unique(pf$igroup)[unique(pf$igroup) != 'prize0']) {
   plot(
     sub$spend_bin, -sub$enpv_spend_mean,
     main = sprintf('%s (mean: y = %sx + %s)', group, round(mod$coefficients[2],4), round(mod$coefficients[1],4)),
-    #main = group,
     xlab = 'Intervention size',
     ylab = 'Inverse rNPV of intervention (min/mean/max)',
     type='l')
@@ -694,7 +681,6 @@ for (group in unique(fewer$igroup[fewer$igroup != 'prize0'])) {
     sub$spend_bin,
     sub$enpv0diff,
     log = 'xy',
-    #col = sub$igroup,
     xlab = 'Intervention size',
     ylab = 'Absolute rNPV improvement',
     ylim = c(yMin, yMax),
