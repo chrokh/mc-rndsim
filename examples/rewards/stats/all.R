@@ -508,36 +508,39 @@ par(mfrow=c(1,1)) # reset layout
 
 # rNPV improvement (min/mean/max) ~ intervention size
 # ===================================================
-grouped <- byInterventionBin
+grouped <- byInterventionLogBin
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
 for (group in unique(grouped[grouped$igroup!='prize0',]$igroup)) {
   plot(
-    grouped$spend_bin,
+    grouped$spend_logbin,
     grouped$enpv0diff_mean,
     ylim = c(min(grouped$enpv0diff_min), max(grouped$enpv0diff_max)),
     log = 'xy',
     type = 'n',
+    xlim = c(10, 5000),
     xlab = 'Intervention size (log)',
     ylab = 'rNPV (min/mean/max) (log)',
     main = group
   )
   sub <- grouped[grouped$igroup==group,]
-  lines(sub$spend_bin, sub$enpv0diff_mean)
-  lines(sub$spend_bin, sub$enpv0diff_max, lty=3)
-  lines(sub$spend_bin, sub$enpv0diff_min, lty=3)
+  lines(sub$spend_logbin, sub$enpv0diff_mean)
+  lines(sub$spend_logbin, sub$enpv0diff_max, lty=3)
+  lines(sub$spend_logbin, sub$enpv0diff_min, lty=3)
 }
 plot(
-  grouped$spend_bin,
+  grouped$spend_logbin,
   grouped$enpv0diff_mean,
   log = 'xy',
   type = 'n',
+  xlim = c(10, 5000),
+  ylim = c(min(grouped$enpv0diff_min), max(grouped$enpv0diff_max)),
   xlab = 'Intervention size',
   ylab = 'Absolute rNPV improvement',
   main = 'all means'
 )
 for (group in unique(grouped$igroup)) {
   sub <- grouped[grouped$igroup == group,]
-  lines(sub$spend_bin, sub$enpv0diff_mean, col = sub$igroup)
+  lines(sub$spend_logbin, sub$enpv0diff_mean, col = sub$igroup)
 }
 legend('bottomright', legend=unique(grouped$igroup), pch=16, col=unique(grouped$igroup))
 par(mfrow=c(1,1)) # reset layout
