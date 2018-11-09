@@ -172,11 +172,10 @@ merged$go_corrected_prob <- ifelse(merged$idecision0=='true', merged$iprob, 0)
 merged$go_and_gaming_corrected_enpv_spend <- ifelse(merged$idecision0=='true', merged$gaming_corrected_enpv_spend, 0)
 
 # Bin
-merged$spend_bin             <- mround(merged$spend, 10)
-merged$spend_logbin          <- log_bin(merged$spend, 2)
-merged$enpv_spend_bin        <- bin_into(merged$enpv_spend, 200)
-merged$enpv0diff_bin         <- bin_into(merged$enpv0diff, 500)
-merged$enpv0ratio_bin        <- bin_into(merged$enpv0ratio, 500)
+merged$spend_bin      <- mround(merged$spend, 10)
+merged$spend_logbin   <- log_bin(merged$spend, 2)
+merged$enpv0diff_bin  <- bin_into(merged$enpv0diff, 500)
+merged$enpv0ratio_bin <- bin_into(merged$enpv0ratio, 500)
 
 # Prepare go decisions for summing
 merged$go  <- merged$enpv0  >= merged$threshold
