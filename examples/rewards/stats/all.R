@@ -173,7 +173,6 @@ merged$go_and_gaming_corrected_enpv_spend <- ifelse(merged$idecision0=='true', m
 
 # Bin
 merged$spend_bin             <- mround(merged$spend, 10)
-merged$spend_5bin            <- mround(merged$spend, 5)
 merged$spend_logbin          <- log_bin(merged$spend, 2)
 merged$enpv_spend_bin        <- bin_into(merged$enpv_spend, 200)
 merged$enpv0diff_bin         <- bin_into(merged$enpv0diff, 500)
@@ -235,8 +234,8 @@ byGroupAnd <- function(df, spend_key) {
   )
 }
 
-byGroupAndSpendBin    <- byGroupAnd(merged, 'spend_bin')
-byGroupAndSpendLogBin <- byGroupAnd(merged, 'spend_logbin')
+byInterventionBin    <- byGroupAnd(merged, 'spend_bin')
+byInterventionLogBin <- byGroupAnd(merged, 'spend_logbin')
 
 byGroupAndEnpv0DiffBin <- ddply(
   merged,
@@ -252,7 +251,7 @@ byGroupAndEnpv0DiffBin <- ddply(
 
 # go-rate ~ non-capitalized cost (not log samples)
 # ================================================
-pf <- byGroupAndSpendBin
+pf <- byInterventionBin
 plot(
   pf$spend_bin,
   pf$igo_ratio,
@@ -273,7 +272,7 @@ legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 
 # go-rate ~ non-capitalized intervention size
 # ===========================================
-pf <- byGroupAndSpendLogBin
+pf <- byInterventionLogBin
 plot(
   pf$spend_logbin,
   pf$igo_ratio,
@@ -298,7 +297,7 @@ for (group in unique(pf$igroup)) {
 
 # go-rate ~ rNPV (grouped by intervention spend)
 # ==============================================
-pf <- byGroupAndSpendLogBin
+pf <- byInterventionLogBin
 # Note: cutting off some of the data for visual purposes
 pf <- pf[-pf$enpv_spend_mean >= 1 & -pf$enpv_spend_mean <= 5000,]
 plot(
@@ -325,7 +324,7 @@ for (group in unique(pf$igroup)) {
 
 # entries ~ rNPV (go-corrected)
 # =============================
-pf <- byGroupAndSpendLogBin
+pf <- byInterventionLogBin
 # Note: cutting off some of the data for visual purposes
 pf <- pf[-pf$go_corrected_enpv_spend_mean >= 1, ]
 plot(
@@ -354,7 +353,7 @@ points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 # entries ~ rNPV (gaming + go-corrected)
 # ======================================
-pf <- byGroupAndSpendLogBin
+pf <- byInterventionLogBin
 # Note: cutting off some of the data for visual purposes
 pf <- pf[-pf$gaming_and_go_corrected_enpv_spend_mean >= 1, ]
 plot(
@@ -383,7 +382,7 @@ points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 
 # go-rate ~ rNPV (go-corrected)
 # =============================
-pf<- byGroupAndSpendLogBin
+pf<- byInterventionLogBin
 pf <- subset(pf, pf$go_corrected_enpv_spend_mean <= -1) # cutoffs for visual purposes
 plot(
   -pf$go_corrected_enpv_spend_mean,
@@ -411,7 +410,7 @@ for (group in unique(pf$igroup)) {
 # rNPV (not go-corrected) ~ intervention size
 # ===========================================
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
-pf <- byGroupAndSpendBin
+pf <- byInterventionBin
 pf <- pf[pf$spend_bin <= 1000 & pf$spend_bin >= 50, ]
 not0 <- subset(pf, pf$igroup != 'prize0')
 for(group in unique(not0$igroup)) {
@@ -487,7 +486,7 @@ par(mfrow=c(1,1)) # reset layout
 
 # rNPV improvement ~ intervention size
 # ====================================
-grouped <- byGroupAndSpendBin
+grouped <- byInterventionBin
 fewer <- merged[c(1:min(10000, nrow(merged))),]
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
 yMin <- min(fewer[fewer$igroup!='base' & fewer$spend_bin>0 & fewer$spend_bin<2000,]$enpv0diff)
@@ -529,7 +528,7 @@ par(mfrow=c(1,1)) # reset layout
 
 # rNPV improvement (min/mean/max) ~ intervention size
 # ===================================================
-grouped <- byGroupAndSpendBin
+grouped <- byInterventionBin
 layout(mat = matrix(c(1,2,3,4,5,6), ncol = 3, byrow = TRUE))
 for (group in unique(grouped[grouped$igroup!='prize0',]$igroup)) {
   plot(
