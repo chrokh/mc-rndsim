@@ -169,7 +169,9 @@ merged$enpv0ratio <- (merged$ienpv0 + bottom) / (merged$enpv0 + bottom)
 merged$go_corrected_prob <- ifelse(merged$idecision0=='true', merged$iprob, 0)
 
 # Compute go- and gaming corrected ENPV spend (i.e. actual expected cost of intervention)
+merged$go_corrected_enpv_spend            <- ifelse(merged$idecision0=='true', merged$enpv_spend, 0)
 merged$go_and_gaming_corrected_enpv_spend <- ifelse(merged$idecision0=='true', merged$gaming_corrected_enpv_spend, 0)
+
 
 # Bin
 merged$spend_bin      <- mround(merged$spend, 10)
@@ -219,17 +221,17 @@ byGroupAnd <- function(df, spend_key) {
     enpv0ratio_min  = min(enpv0ratio),
     enpv0ratio_max  = max(enpv0ratio),
 
-    go_corrected_enpv_spend_max  = max(ifelse(idecision0=='true',  enpv_spend, 0)),
-    go_corrected_enpv_spend_min  = min(ifelse(idecision0=='true',  enpv_spend, 0)),
-    go_corrected_enpv_spend_mean = mean(ifelse(idecision0=='true', enpv_spend, 0)),
+    go_corrected_enpv_spend_max  = max(go_corrected_enpv_spend),
+    go_corrected_enpv_spend_min  = min(go_corrected_enpv_spend),
+    go_corrected_enpv_spend_mean = mean(go_corrected_enpv_spend),
     
-    gaming_and_go_corrected_enpv_spend_max  = max(ifelse(idecision0=='true',  gaming_corrected_enpv_spend, 0)),
-    gaming_and_go_corrected_enpv_spend_min  = min(ifelse(idecision0=='true',  gaming_corrected_enpv_spend, 0)),
-    gaming_and_go_corrected_enpv_spend_mean = mean(ifelse(idecision0=='true', gaming_corrected_enpv_spend, 0)),
+    gaming_and_go_corrected_enpv_spend_max  = max(go_and_gaming_corrected_enpv_spend),
+    gaming_and_go_corrected_enpv_spend_min  = min(go_and_gaming_corrected_enpv_spend),
+    gaming_and_go_corrected_enpv_spend_mean = mean(go_and_gaming_corrected_enpv_spend),
     
-    go_corrected_prob_mean = mean(ifelse(idecision0=='true', iprob, 0)),
-    go_corrected_prob_min  = min(ifelse(idecision0=='true',  iprob, 0)),
-    go_corrected_prob_max  = max(ifelse(idecision0=='true',  iprob, 0))
+    go_corrected_prob_mean = mean(go_corrected_prob),
+    go_corrected_prob_min  = min(go_corrected_prob),
+    go_corrected_prob_max  = max(go_corrected_prob)
   )
 }
 
