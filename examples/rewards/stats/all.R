@@ -39,9 +39,6 @@ log_bin <- function(vec, div=1) {
   }
   sapply(vec, f)
 }
-# xs <- c(1402.220,3946.397,516.130,2239.468,4542.978,1468.071,0.54,0.234,0.0321)
-# xs
-# log_bin(xs, 2)
 
 # source: https://gist.github.com/cavvia/811206
 log_tick_marks <- function(min,max)
