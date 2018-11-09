@@ -168,6 +168,12 @@ merged$enpv0diff  <- merged$ienpv0 - merged$enpv0
 bottom <- abs(min(merged$enpv0, merged$ienpv0)) + 1
 merged$enpv0ratio <- (merged$ienpv0 + bottom) / (merged$enpv0 + bottom)
 
+# Compute go-corrected prob (i.e. LOMA)
+merged$go_corrected_prob <- ifelse(merged$idecision0=='true', merged$iprob, 0)
+
+# Compute go- and gaming corrected ENPV spend (i.e. actual expected cost of intervention)
+merged$go_and_gaming_corrected_enpv_spend <- ifelse(merged$idecision0=='true', merged$gaming_corrected_enpv_spend, 0)
+
 # Bin
 merged$spend_bin             <- mround(merged$spend, 10)
 merged$spend_5bin            <- mround(merged$spend, 5)
@@ -218,13 +224,13 @@ byGroupAnd <- function(df, spend_key) {
     enpv0ratio_min  = min(enpv0ratio),
     enpv0ratio_max  = max(enpv0ratio),
 
-    go_corrected_enpv_spend_max  = max(enpv_spend[idecision0  == 'true']),
-    go_corrected_enpv_spend_min  = min(enpv_spend[idecision0  == 'true']),
-    go_corrected_enpv_spend_mean = mean(enpv_spend[idecision0 == 'true']),
+    go_corrected_enpv_spend_max  = max(ifelse(idecision0=='true',  enpv_spend, 0)),
+    go_corrected_enpv_spend_min  = min(ifelse(idecision0=='true',  enpv_spend, 0)),
+    go_corrected_enpv_spend_mean = mean(ifelse(idecision0=='true', enpv_spend, 0)),
     
-    gaming_and_go_corrected_enpv_spend_max  = max(gaming_corrected_enpv_spend[idecision0  == 'true']),
-    gaming_and_go_corrected_enpv_spend_min  = min(gaming_corrected_enpv_spend[idecision0  == 'true']),
-    gaming_and_go_corrected_enpv_spend_mean = mean(gaming_corrected_enpv_spend[idecision0 == 'true']),
+    gaming_and_go_corrected_enpv_spend_max  = max(ifelse(idecision0=='true',  gaming_corrected_enpv_spend, 0)),
+    gaming_and_go_corrected_enpv_spend_min  = min(ifelse(idecision0=='true',  gaming_corrected_enpv_spend, 0)),
+    gaming_and_go_corrected_enpv_spend_mean = mean(ifelse(idecision0=='true', gaming_corrected_enpv_spend, 0)),
     
     go_corrected_prob_mean = mean(ifelse(idecision0=='true', iprob, 0)),
     go_corrected_prob_min  = min(ifelse(idecision0=='true',  iprob, 0)),
@@ -318,6 +324,7 @@ for (group in unique(pf$igroup)) {
   sub <- pf[pf$igroup == group,]
   lines(-sub$enpv_spend_mean, sub$igo_ratio, col = sub$igroup)
 }
+
 
 # entries ~ rNPV (go-corrected)
 # =============================
@@ -558,6 +565,7 @@ for (group in unique(grouped$igroup)) {
 }
 legend('bottomright', legend=unique(grouped$igroup), pch=16, col=unique(grouped$igroup))
 par(mfrow=c(1,1)) # reset layout
+
 
 
 # Correlation between spend and enpv spend for different subsets
