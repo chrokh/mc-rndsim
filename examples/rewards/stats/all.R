@@ -186,7 +186,7 @@ merged$igo <- merged$ienpv0 >= merged$ithreshold
 byGroupAnd <- function(df, spend_key) {
   ddply(
     merged,
-    c('igroup', spend_key), #.(igroup, spend_logbin),
+    c('igroup', spend_key),
     summarize,
 
     count     = length(prob),
@@ -247,27 +247,6 @@ byGroupAndEnpv0DiffBin <- ddply(
 )
 
 # =====================================
-
-
-# go-rate ~ non-capitalized cost (not log samples)
-# ================================================
-pf <- byInterventionBin
-plot(
-  pf$spend_bin,
-  pf$igo_ratio,
-  col = as.factor(pf$igroup),
-  log = 'x',
-  las = 1,
-  pch = 16,
-  xaxt = 'n',
-  xlab = 'Non-capitalized public intervention expenditure (binned)',
-  ylab = 'Go-decisions (%)'
-)
-axis(1,log_tick_marks(1,5000), las=2)
-abline(v=c(min(base$cost), mean(base$cost), max(base$cost)), col='black', lty=c(3,2,3), lwd=1.5)
-abline(v=c(min(base$cost*(1+WASTE)), mean(base$cost*(1+WASTE)), max(base$cost*(1+WASTE))), col='darkgrey', lty=c(3,2,3), lwd=1.5)
-mtext(side = 1, line = 4, '(Dashed lines represent min/mean/max development cost)')
-legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 
 
 # go-rate ~ non-capitalized intervention size
