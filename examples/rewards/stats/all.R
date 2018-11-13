@@ -41,6 +41,7 @@ log_bin <- function(vec, div=1) {
 }
 
 # source: https://gist.github.com/cavvia/811206
+# TODO: Min is not respected. Seems to always start from 1.
 log_tick_marks <- function(min,max)
 {
   nsplit <- abs(round(log10(max-min)))
@@ -261,11 +262,12 @@ plot(
   las = 1,
   pch = 16,
   xaxt = 'n',
-  xlim = c(15, 6000),
+  xlim = c(20, 6000),
   xlab = 'Non-capitalized public intervention expenditure (binned)',
   ylab = 'Go-decisions (%)'
 )
-axis(1,log_tick_marks(1,5000), las=2)
+
+axis(1, log_tick_marks(1,1000) * 10, las=2)
 abline(v=c(min(base$cost), mean(base$cost), max(base$cost)), col='black', lty=c(3,2,3), lwd=1.5)
 abline(v=c(min(base$cost*(1+WASTE)), mean(base$cost*(1+WASTE)), max(base$cost*(1+WASTE))), col='darkgrey', lty=c(3,2,3), lwd=1.5)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
@@ -372,7 +374,7 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
-  xlim = c(20, 3000),
+  xlim = c(1, 3000),
   xlab = 'Mean rNPV of public intervention expenditure',
   ylab = 'Go-decisions (%)'
 )
