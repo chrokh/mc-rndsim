@@ -459,11 +459,28 @@ class DistParser
     @data = data
   end
   def parse
-    if @data.to_s.index '-'
+    if @data.index '['
+      ExprDist.new @data
+    elsif @data.to_s.index '-'
       args = @data.split('-')
       UniDist.new args[0], args[1]
     else
       ValDist.new @data
+    end
+  end
+end
+
+class ExprDist
+  def initialize exp
+    @exp = exp
+  end
+  def sample!
+    if @exp.index('[')
+      regex = /\[([\d-]*)\]/
+      sample = DistParser.new(@exp[regex, 1]).parse.sample!
+      ExprDist.new(@exp.sub(regex, sample.to_s)).sample!
+    else
+      eval @exp
     end
   end
 end
