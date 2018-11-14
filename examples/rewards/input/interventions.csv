@@ -1,6 +1,6 @@
 name,     phase,  property,  operator,  operand
-prize1,   1,      revenue,   +,         0-6000
-prize2,   2,      revenue,   +,         0-6000
-prize3,   3,      revenue,   +,         0-6000
-prize4,   4,      revenue,   +,         0-6000
-prize5,   5,      revenue,   +,         0-6000
+prize1,   1,      revenue,   +,         [1-9]*10**[0-4]
+prize2,   2,      revenue,   +,         [1-9]*10**[0-4]
+prize3,   3,      revenue,   +,         [1-9]*10**[0-4]
+prize4,   4,      revenue,   +,         [1-9]*10**[0-4]
+prize5,   5,      revenue,   +,         [1-9]*10**[0-4]
