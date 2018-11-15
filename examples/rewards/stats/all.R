@@ -262,11 +262,10 @@ plot(
   las = 1,
   pch = 16,
   xaxt = 'n',
-  xlim = c(20, 6000),
+  xlim = c(50, 25000),
   xlab = 'Non-capitalized public intervention expenditure (binned)',
   ylab = 'Go-decisions (%)'
 )
-
 axis(1, log_tick_marks(1,1000) * 10, las=2)
 abline(v=c(min(base$cost), mean(base$cost), max(base$cost)), col='black', lty=c(3,2,3), lwd=1.5)
 abline(v=c(min(base$cost*(1+WASTE)), mean(base$cost*(1+WASTE)), max(base$cost*(1+WASTE))), col='darkgrey', lty=c(3,2,3), lwd=1.5)
@@ -290,7 +289,7 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
-  xlim = c(20, 3000),
+  xlim = c(20, 5000),
   xlab = 'Mean rNPV of public intervention expenditure',
   ylab = 'Go-decisions (%)'
 )
@@ -374,7 +373,7 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
-  xlim = c(1, 3000),
+  xlim = c(1, 15000),
   xlab = 'Mean rNPV of public intervention expenditure',
   ylab = 'Go-decisions (%)'
 )
