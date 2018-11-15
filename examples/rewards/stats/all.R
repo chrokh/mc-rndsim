@@ -56,6 +56,21 @@ log_tick_marks <- function(min,max)
 }
 # =========================================
 
+# Determine decisions at different phase-entry points
+tmp$decision0 <- tmp$enpv0 >= 0
+tmp$decision1 <- tmp$enpv1 >= 0
+tmp$decision2 <- tmp$enpv2 >= 0
+tmp$decision3 <- tmp$enpv3 >= 0
+tmp$decision4 <- tmp$enpv4 >= 0
+tmp$decision5 <- tmp$enpv5 >= 0
+
+# Determine consecutive decisions
+tmp$conseq_decision0 <- tmp$decision0
+tmp$conseq_decision1 <- tmp$conseq_decision0 & tmp$decision1
+tmp$conseq_decision2 <- tmp$conseq_decision1 & tmp$decision2
+tmp$conseq_decision3 <- tmp$conseq_decision2 & tmp$decision3
+tmp$conseq_decision4 <- tmp$conseq_decision3 & tmp$decision4
+tmp$conseq_decision5 <- tmp$conseq_decision4 & tmp$decision5
 
 # Sum up development costs, revenues, and PoS (i.e. excluding the market)
 tmp$prob     <- tmp$prob0 * tmp$prob1 * tmp$prob2 * tmp$prob3 * tmp$prob4 * tmp$prob5
@@ -167,12 +182,11 @@ bottom <- abs(min(merged$enpv0, merged$ienpv0)) + 1
 merged$enpv0ratio <- (merged$ienpv0 + bottom) / (merged$enpv0 + bottom)
 
 # Compute go-corrected prob (i.e. LOMA)
-merged$go_corrected_prob <- ifelse(merged$idecision0=='true', merged$iprob, 0)
+merged$go_corrected_prob <- ifelse(merged$idecision0==TRUE, merged$iprob, 0)
 
 # Compute go- and gaming corrected ENPV spend (i.e. actual expected cost of intervention)
-merged$go_corrected_enpv_spend            <- ifelse(merged$idecision0=='true', merged$enpv_spend, 0)
-merged$go_and_gaming_corrected_enpv_spend <- ifelse(merged$idecision0=='true', merged$gaming_corrected_enpv_spend, 0)
-
+merged$go_corrected_enpv_spend            <- ifelse(merged$idecision0==TRUE, merged$enpv_spend, 0)
+merged$go_and_gaming_corrected_enpv_spend <- ifelse(merged$idecision0==TRUE, merged$gaming_corrected_enpv_spend, 0)
 
 # Bin
 merged$spend_bin      <- mround(merged$spend, 10)
@@ -180,9 +194,6 @@ merged$spend_logbin   <- log_bin(merged$spend, 2)
 merged$enpv0diff_bin  <- bin_into(merged$enpv0diff, 500)
 merged$enpv0ratio_bin <- bin_into(merged$enpv0ratio, 500)
 
-# Prepare go decisions for summing
-merged$go  <- merged$enpv0  >= merged$threshold
-merged$igo <- merged$ienpv0 >= merged$ithreshold
 
 # ======== Aggregate ===============
 byGroupAnd <- function(df, spend_key) {
@@ -192,8 +203,8 @@ byGroupAnd <- function(df, spend_key) {
     summarize,
 
     count     = length(prob),
-    go_count  = sum(go),
-    igo_count = sum(igo),
+    go_count  = sum(decision0),
+    igo_count = sum(idecision0),
     go_ratio  = go_count / count * 100,
     igo_ratio = igo_count / count * 100,
     go_ratio_improvement = igo_ratio / go_ratio,
@@ -244,7 +255,7 @@ byGroupAndEnpv0DiffBin <- ddply(
   .(igroup, enpv0diff_bin),
   summarize,
   count     = length(prob),
-  igo_count = sum(igo),
+  igo_count = sum(idecision0),
   igo_ratio = igo_count / count * 100
 )
 
