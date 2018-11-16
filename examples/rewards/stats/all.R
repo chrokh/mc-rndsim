@@ -274,8 +274,8 @@ plot(
   pch = 16,
   xaxt = 'n',
   xlim = c(50, 25000),
-  xlab = 'Non-capitalized public intervention expenditure (binned)',
-  ylab = 'Go-decisions (%)'
+  xlab = 'Non-capitalized intervention size',
+  ylab = 'PC go-decisions (%)'
 )
 axis(1, log_tick_marks(1,1000) * 10, las=2)
 abline(v=c(min(base$cost), mean(base$cost), max(base$cost)), col='black', lty=c(3,2,3), lwd=1.5)
@@ -290,8 +290,6 @@ for (group in unique(pf$igroup)) {
 # go-rate ~ rNPV (grouped by intervention spend)
 # ==============================================
 pf <- byInterventionLogBin
-# Note: cutting off some of the data for visual purposes
-pf <- pf[-pf$enpv_spend_mean >= 1 & -pf$enpv_spend_mean <= 5000,]
 plot(
   -pf$enpv_spend_mean,
   pf$igo_ratio,
@@ -300,9 +298,9 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
-  xlim = c(20, 5000),
-  xlab = 'Mean rNPV of public intervention expenditure',
-  ylab = 'Go-decisions (%)'
+  xlim = c(5, 12000),
+  xlab = 'Mean intervention rNPV',
+  ylab = 'PC go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
 abline(v=c(min(-base$public_enpv0), mean(-base$public_enpv0), max(-base$public_enpv0)), col='black', lty=c(3,2,3), lwd=1.5)
@@ -317,8 +315,6 @@ for (group in unique(pf$igroup)) {
 # entries ~ rNPV (go-corrected)
 # =============================
 pf <- byInterventionLogBin
-# Note: cutting off some of the data for visual purposes
-pf <- pf[-pf$go_corrected_enpv_spend_mean >= 1, ]
 plot(
   -pf$go_corrected_enpv_spend_mean,
   pf$go_corrected_prob_mean * 100,
@@ -326,9 +322,10 @@ plot(
   log = 'x',
   las = 2,
   pch = 16,
+  xlim = c(1, 7000),
   xaxt = 'n',
-  xlab = 'Mean rNPV of public intervention expenditure',
-  ylab = 'Mean likelihood of market entry per PC entry (%)'
+  xlab = 'Mean intervention rNPV',
+  ylab = 'Mean LOMAs (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
 mtext(side=2, line=2, text='(go-corrected)')
@@ -346,8 +343,6 @@ points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
 # entries ~ rNPV (gaming + go-corrected)
 # ======================================
 pf <- byInterventionLogBin
-# Note: cutting off some of the data for visual purposes
-pf <- pf[-pf$gaming_and_go_corrected_enpv_spend_mean >= 1, ]
 plot(
   -pf$gaming_and_go_corrected_enpv_spend_mean,
   pf$go_corrected_prob_mean * 100,
@@ -356,8 +351,9 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
-  xlab = 'Mean rNPV of public intervention expenditure',
-  ylab = 'Mean likelihood of market entry per PC entry (%)'
+  xlim = c(1, 7000),
+  xlab = 'Mean intervention rNPV',
+  ylab = 'Mean LOMA (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
 mtext(side=2, line=2, text='(go-corrected)')
@@ -385,8 +381,8 @@ plot(
   pch = 16,
   xaxt = 'n',
   xlim = c(1, 15000),
-  xlab = 'Mean rNPV of public intervention expenditure',
-  ylab = 'Go-decisions (%)'
+  xlab = 'Mean intervention rNPV',
+  ylab = 'PC go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
 mtext(side=1, line=4, text='(go-corrected)')
@@ -413,7 +409,7 @@ for(group in unique(not0$igroup)) {
     #main = sprintf('%s (mean: y = %sx + %s)', group, round(mod$coefficients[2],4), round(mod$coefficients[1],4)),
     main = group,
     xlab = 'Intervention size',
-    ylab = 'Inverse rNPV of intervention (min/mean/max)',
+    ylab = 'Intervention rNPV (min/mean/max)',
     xlim = c(min(not0$spend_bin),        max(not0$spend_bin)),
     ylim = c(min(-not0$enpv_spend_mean), max(-not0$enpv_spend_mean)),
     type='l')
@@ -431,7 +427,7 @@ plot(
   pch = 16,
   main = 'all means (log-log)',
   xlab = 'Intervention size',
-  ylab = 'Negative rNPV of spend'
+  ylab = 'Intervention rNPV'
 )
 for (group in pf$igroup) {
   sub <- subset(pf, pf$igroup == group)
