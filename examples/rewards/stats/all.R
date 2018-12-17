@@ -120,6 +120,18 @@ tmp$ineff_public_epv4 <- (tmp$revenue4-tmp$cost4*(1+WASTE))/((1+DISCOUNT_RATE)^(
 tmp$ineff_public_epv5 <- (tmp$revenue5-tmp$cost5*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto5)) * (tmp$prob4*(1-WASTE))
 tmp$ineff_public_enpv0 <- tmp$ineff_public_epv0 + tmp$ineff_public_epv1 + tmp$ineff_public_epv2 + tmp$ineff_public_epv3 + tmp$ineff_public_epv4 + tmp$ineff_public_epv5
 
+ineff_dev_enpv0 <- function(ldf, waste) {
+  # Compute inefficiency-corrected public ENPV
+  ldf$ineff_public_epv0 <- (ldf$revenue0-ldf$cost0*(1+waste))/((1+DISCOUNT_RATE)^(ldf$ineff_timeto0)) * 1
+  ldf$ineff_public_epv1 <- (ldf$revenue1-ldf$cost1*(1+waste))/((1+DISCOUNT_RATE)^(ldf$ineff_timeto1)) * (ldf$prob0*(1-waste))
+  ldf$ineff_public_epv2 <- (ldf$revenue2-ldf$cost2*(1+waste))/((1+DISCOUNT_RATE)^(ldf$ineff_timeto2)) * (ldf$prob1*(1-waste))
+  ldf$ineff_public_epv3 <- (ldf$revenue3-ldf$cost3*(1+waste))/((1+DISCOUNT_RATE)^(ldf$ineff_timeto3)) * (ldf$prob2*(1-waste))
+  ldf$ineff_public_epv4 <- (ldf$revenue4-ldf$cost4*(1+waste))/((1+DISCOUNT_RATE)^(ldf$ineff_timeto4)) * (ldf$prob3*(1-waste))
+  ldf$ineff_public_epv5 <- (ldf$revenue5-ldf$cost5*(1+waste))/((1+DISCOUNT_RATE)^(ldf$ineff_timeto5)) * (ldf$prob4*(1-waste))
+  ldf$ineff_public_enpv0 <- ldf$ineff_public_epv0 + ldf$ineff_public_epv1 + ldf$ineff_public_epv2 + ldf$ineff_public_epv3 + ldf$ineff_public_epv4 + ldf$ineff_public_epv5
+  ldf$ineff_public_enpv0
+}
+
 # Compute inefficiency-corrected public ENPV (IS PROB HANDLED CORRECTLY HERE?)
 tmp$ineff_cash_only_public_epv0  <- (tmp$revenue0-tmp$cost0*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto0)) * 1
 tmp$ineff_cash_only_public_epv1  <- (tmp$revenue1-tmp$cost1*(1+WASTE))/((1+DISCOUNT_RATE)^(tmp$ineff_timeto1)) * (tmp$prob0)
@@ -298,11 +310,13 @@ plot(
   las = 2,
   pch = 16,
   xaxt = 'n',
+  #yaxt = 'n',
   xlim = c(5, 12000),
   xlab = 'Mean intervention rNPV',
   ylab = 'PC go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
+#axis(2, log_tick_marks(1, 100), las=2)
 abline(v=c(min(-base$public_enpv0), mean(-base$public_enpv0), max(-base$public_enpv0)), col='black', lty=c(3,2,3), lwd=1.5)
 abline(v=c( min(-base$ineff_public_enpv0), mean(-base$ineff_public_enpv0), max(-base$ineff_public_enpv0)), col='darkgrey', lty=c(3,2,3), lwd=1.5)
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
@@ -323,13 +337,17 @@ plot(
   las = 2,
   pch = 16,
   xlim = c(1, 7000),
+  ylim = c(0.4, 6.5),
   xaxt = 'n',
+  #yaxt = 'n',
   xlab = 'Mean intervention rNPV',
   ylab = 'Mean LOMAs (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
+#axis(2, log_tick_marks(1, 100), las=2)
 mtext(side=2, line=2, text='(go-corrected)')
 mtext(side=1, line=4, text='(go-corrected)')
+mtext(side=4, line=-1.5, text='Inefficiency (%)')
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
 for (group in unique(pf$igroup)) {
   sub <- subset(pf, pf$igroup == group)
@@ -337,7 +355,38 @@ for (group in unique(pf$igroup)) {
 }
 abline(h=mean(base$prob*(1-WASTE)*100), lty=2, col='darkgrey')
 abline(v=mean(-base$ineff_public_enpv0), lty=2, col='darkgrey')
-points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15)
+#points(mean(-ineff_dev_enpv0(base, 0.3)), mean(base$prob*(1-0.3)*100), pch=15, col='green')
+#points(mean(-ineff_dev_enpv0(base, 0.5)), mean(base$prob*(1-0.5)*100), pch=15, col='red')
+ineffsX <- c(
+  mean(-ineff_dev_enpv0(base, 0)),
+  mean(-ineff_dev_enpv0(base, 0.1)),
+  mean(-ineff_dev_enpv0(base, 0.2)),
+  mean(-ineff_dev_enpv0(base, 0.3)),
+  mean(-ineff_dev_enpv0(base, 0.4)),
+  mean(-ineff_dev_enpv0(base, 0.5)),
+  mean(-ineff_dev_enpv0(base, 0.6)),
+  mean(-ineff_dev_enpv0(base, 0.7)),
+  mean(-ineff_dev_enpv0(base, 0.8)),
+  mean(-ineff_dev_enpv0(base, 0.9)),
+  mean(-ineff_dev_enpv0(base, 1))
+)
+ineffsY <- c(
+  mean(base$prob*(1-0)*100),
+  mean(base$prob*(1-0.1)*100),
+  mean(base$prob*(1-0.2)*100),
+  mean(base$prob*(1-0.3)*100),
+  mean(base$prob*(1-0.4)*100),
+  mean(base$prob*(1-0.5)*100),
+  mean(base$prob*(1-0.6)*100),
+  mean(base$prob*(1-0.7)*100),
+  mean(base$prob*(1-0.8)*100),
+  mean(base$prob*(1-0.9)*100),
+  mean(base$prob*(1-1)*100)
+)
+lines(ineffsX, ineffsY)
+points(ineffsX, ineffsY, pch=15)
+axis(4, labels=seq(0,100,10), at=ineffsY, las=2)
+points(mean(-base$ineff_public_enpv0), mean(base$prob*(1-WASTE)*100), pch=15, col='grey')
 
 
 # entries ~ rNPV (gaming + go-corrected)
@@ -347,15 +396,18 @@ plot(
   -pf$gaming_and_go_corrected_enpv_spend_mean,
   pf$go_corrected_prob_mean * 100,
   col = as.factor(pf$igroup),
-  log = 'x',
+  log = 'xy',
   las = 2,
   pch = 16,
   xaxt = 'n',
+  yaxt = 'n',
   xlim = c(1, 7000),
+  ylim = c(0.4, 6),
   xlab = 'Mean intervention rNPV',
   ylab = 'Mean LOMA (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
+axis(2, log_tick_marks(1, 100), las=2)
 mtext(side=2, line=2, text='(go-corrected)')
 mtext(side=1, line=4, text='(go- and gaming-corrected)')
 legend('bottomright', legend=unique(pf$igroup), pch=16, col=unique(pf$igroup))
@@ -376,15 +428,17 @@ plot(
   -pf$go_corrected_enpv_spend_mean,
   pf$igo_ratio,
   col = as.factor(pf$igroup),
-  log = 'x',
+  log = 'xy',
   las = 2,
   pch = 16,
   xaxt = 'n',
+  yaxt = 'n',
   xlim = c(1, 15000),
   xlab = 'Mean intervention rNPV',
   ylab = 'PC go-decisions (%)'
 )
 axis(1, log_tick_marks(10, 4000), las=2)
+axis(2, log_tick_marks(1, 100), las=2)
 mtext(side=1, line=4, text='(go-corrected)')
 abline(v=c(min(-base$public_enpv0), mean(-base$public_enpv0), max(-base$public_enpv0)), col='black', lty=c(3,2,3), lwd=1.5)
 abline(v=c( min(-base$ineff_public_enpv0), mean(-base$ineff_public_enpv0), max(-base$ineff_public_enpv0)), col='darkgrey', lty=c(3,2,3), lwd=1.5)
