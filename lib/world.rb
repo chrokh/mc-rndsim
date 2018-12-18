@@ -12,14 +12,11 @@ class World
   def decision_points
     @decision_points ||= Helpers.ladder(@phases).map do |phases|
       # TODO: Should e.g. pass agent rather than extract params and then pass
-      DecisionPoint.new (phases + @market.phases), @agent.rate, @agent.mini
+      DecisionPoint.new (phases + @market.phases), @agent.rate
     end
   end
   def run
-    enpvs   = decision_points.map(&:enpv)
-    gonos   = decision_points.map(&:decision)
-    conseqs = gonos.reduce([true]) { |acc, x| acc << (acc.last && x) }.drop(1)
-    phases  = @phases + @market.phases
+    phases = @phases + @market.phases
     (
       {
         id:               @id,
@@ -27,9 +24,7 @@ class World
       }
     ).merge(@agent.to_h).merge(
       {
-        enpv:             enpvs,
-        decision:         gonos,
-        conseq_decision:  conseqs,
+        enpv:             decision_points.map(&:enpv),
         time:             phases.map(&:time),
         cost:             phases.map(&:cost),
         revenue:          phases.map(&:cash),

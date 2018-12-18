@@ -2,10 +2,9 @@ require_relative 'helpers'
 require_relative 'cashflow'
 
 class DecisionPoint
-  def initialize phases, rate, mini
+  def initialize phases, rate
     @phases = phases
     @rate   = rate
-    @mini   = mini # TODO: Should not be passed through constructor?
   end
   def remaining_prob
     @phases.map(&:prob).reduce(&:*)
@@ -24,8 +23,5 @@ class DecisionPoint
       cashflow                 = flows.first.cash - flows.first.cost
       Cashflow.new(cashflow, time_to, remaining_prob, remaining_prob_from_flow)
     end
-  end
-  def decision
-    enpv >= @mini
   end
 end

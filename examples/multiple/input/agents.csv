@@ -1,2 +1,2 @@
-name,  discount_rate,  threshold
-a,     0.08-0.3,       0-200
+name,  discount_rate
+a,     0.08-0.3

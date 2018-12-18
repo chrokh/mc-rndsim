@@ -1,30 +1,26 @@
 class Agent
-  attr_reader :rate, :mini
-  def initialize name, rate, mini
+  attr_reader :rate
+  def initialize name, rate
     @name = name
     @rate = rate
-    @mini = mini
   end
   def to_h
     {
       agent:         @name,
       discount_rate: @rate,
-      threshold:     @mini
     }
   end
 end
 
 class AgentDist
-  def initialize name, rate, mini
+  def initialize name, rate
     @name = name
     @rate = rate
-    @mini = mini
   end
   def sample!
     Agent.new(
       @name,
       @rate.sample!,
-      @mini.sample!
     )
   end
 end
@@ -39,8 +35,7 @@ class AgentsParser
         CSVParser.new(@data).lines.map do |line|
           AgentDist.new(
             line[0],
-            DistParser.new(line[1]).parse,
-            DistParser.new(line[2]).parse
+            DistParser.new(line[1]).parse
           )
         end
       )
