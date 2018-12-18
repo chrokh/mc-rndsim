@@ -1,4 +1,5 @@
-require_relative 'lib/lib'
+require_relative 'lib/simulation'
+require_relative 'lib/writer'
 
 def run n, input1, input2, input3, output, seed
   unless seed.nil? then srand(seed.to_i) end

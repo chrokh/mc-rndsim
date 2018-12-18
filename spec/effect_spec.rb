@@ -1,4 +1,5 @@
-require 'lib'
+require_relative '../lib/effect'
+require_relative '../lib/phase'
 
 
 describe Effect do

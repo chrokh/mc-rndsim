@@ -1,4 +1,4 @@
-require 'lib'
+require_relative '../lib/decision_point'
 
 
 describe DecisionPoint do
