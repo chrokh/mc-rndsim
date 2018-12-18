@@ -5,7 +5,7 @@ require_relative '../lib/phase'
 describe Effect do
 
   context '#apply' do
-    let (:result) { Effect.new(nil, operator, operand, nil, property).apply(phase) }
+    let (:result) { Effect.new(nil, operator, operand, nil, property).apply(phase, Phase) }
     let (:phase) { Phase.new 10, 5, 50, 0.4 }
     let (:accuracy) { 15 }
 
